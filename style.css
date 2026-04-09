@@ -32,9 +32,17 @@ body {
 }
 
 @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 #starsCanvas {
@@ -51,6 +59,7 @@ body {
     position: relative;
     width: 600px;
     min-height: 850px;
+    height: 850px;
     display: flex;
     margin-top: 10px;
     justify-content: center;
@@ -82,7 +91,8 @@ body {
     text-transform: uppercase;
 }
 
-.main-nav a:hover, .main-nav a.active {
+.main-nav a:hover,
+.main-nav a.active {
     color: var(--gold-light);
     border-bottom: 1px solid var(--gold-light);
     text-shadow: 0 0 10px rgba(243, 217, 162, 0.4);
@@ -124,8 +134,17 @@ body {
 }
 
 @keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.8; filter: drop-shadow(0 0 10px var(--gold-light)); }
-    100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 25px var(--gold-light)); }
+    0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+        filter: drop-shadow(0 0 10px var(--gold-light));
+    }
+
+    100% {
+        transform: scale(1.05);
+        opacity: 1;
+        filter: drop-shadow(0 0 25px var(--gold-light));
+    }
 }
 
 .stars-crosses {
@@ -207,7 +226,8 @@ header {
     letter-spacing: 0.05em;
 }
 
-.tab-btn.active, .tab-btn:hover {
+.tab-btn.active,
+.tab-btn:hover {
     background: rgba(169, 132, 77, 0.15);
     color: var(--gold-light);
     border-color: var(--gold-light);
@@ -295,23 +315,26 @@ header {
     gap: 10px;
 }
 
-.left-align { 
-    text-align: left; 
+.left-align {
+    text-align: left;
     align-items: flex-start;
 }
 
-.right-align { 
-    text-align: right; 
-    align-items: flex-end; 
+.right-align {
+    text-align: right;
+    align-items: flex-end;
 }
 
-.location-link, .calendar-link, .calendar-block-link {
+.location-link,
+.calendar-link,
+.calendar-block-link {
     color: var(--gold-light);
     text-decoration: none;
     transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
-.location-link, .calendar-link {
+.location-link,
+.calendar-link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -321,7 +344,9 @@ header {
     display: flex;
 }
 
-.location-link:hover, .calendar-link:hover, .calendar-block-link:hover {
+.location-link:hover,
+.calendar-link:hover,
+.calendar-block-link:hover {
     color: #fff;
     text-shadow: 0 0 10px rgba(243, 217, 162, 0.8);
 }
@@ -364,23 +389,25 @@ header {
 /* Floating Icons outside arch */
 .floating-icons {
     position: absolute;
-    top: 22%;
-    height: 48%;
+    top: 30px;
+    bottom: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-evenly;
     z-index: 0;
     pointer-events: none;
 }
 
 .floating-icons.left {
-    left: -50px;
+    left: -55px;
 }
 
 .floating-icons.right {
-    right: -50px;
+    right: -55px;
     align-items: flex-end;
 }
+
+
 
 .icon {
     width: 36px;
@@ -391,7 +418,11 @@ header {
     filter: drop-shadow(0 0 5px rgba(169, 132, 77, 0.5));
 }
 
-.dna-icon { animation-delay: 0s; height: 84px; width: 24px; }
+.dna-icon {
+    animation-delay: 0s;
+    height: 60px;
+    width: 24px;
+}
 
 .planet-icon {
     animation-delay: 1.5s;
@@ -485,8 +516,13 @@ header {
 }
 
 @keyframes drift-drinks {
-    0% { transform: translateY(0px) rotate(calc(var(--r) * 1deg)) scale(var(--s)); }
-    100% { transform: translateY(-7px) rotate(calc(var(--r) * 1deg + 5deg)) scale(var(--s)); }
+    0% {
+        transform: translateY(0px) rotate(calc(var(--r) * 1deg)) scale(var(--s));
+    }
+
+    100% {
+        transform: translateY(-7px) rotate(calc(var(--r) * 1deg + 5deg)) scale(var(--s));
+    }
 }
 
 @media (max-width: 700px) {
@@ -525,7 +561,10 @@ header {
 .arch-frame.open-bottom::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border: 2px solid var(--gold-dark);
     border-radius: inherit;
     border-bottom: none;
@@ -538,7 +577,10 @@ header {
 .arch-frame.open-bottom::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border: 2px solid var(--gold-light);
     border-radius: inherit;
     border-bottom: none;
@@ -559,6 +601,7 @@ header {
         -webkit-mask-position: 0 -300px;
         mask-position: 0 -300px;
     }
+
     100% {
         -webkit-mask-position: 0 120%;
         mask-position: 0 120%;
@@ -572,7 +615,8 @@ header {
 .gallery-container {
     max-width: 900px;
     width: 100%;
-    box-shadow: none; /* No single container shadow — using two separate ones */
+    box-shadow: none;
+    /* No single container shadow — using two separate ones */
     border-radius: 0;
     min-height: auto;
 }
@@ -582,10 +626,11 @@ header {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-bottom: 0px; 
+    margin-bottom: 0px;
     position: relative;
     padding-top: 50px;
-    padding-bottom: 120px; /* Expansive padding for bottomless fade-out */
+    padding-bottom: 120px;
+    /* Expansive padding for bottomless fade-out */
     -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
@@ -631,7 +676,8 @@ header {
 
 .gallery-body {
     width: 100%;
-    border: 1px solid var(--gold-dark); /* Thin line all around */
+    border: 1px solid var(--gold-dark);
+    /* Thin line all around */
     border-bottom: none;
     border-radius: 12px 12px 12px 12px;
     padding: 30px 20px 40px;
@@ -643,6 +689,7 @@ header {
 .gallery-date-section {
     margin-bottom: 40px;
 }
+
 .gallery-date-section:last-child {
     margin-bottom: 0;
 }
@@ -670,7 +717,8 @@ header {
     width: 100%;
     aspect-ratio: 1;
     border: 1px solid rgba(169, 132, 77, 0.3);
-    border-radius: 8px; /* Rounded image corners */
+    border-radius: 8px;
+    /* Rounded image corners */
     background: radial-gradient(circle at center, rgba(169, 132, 77, 0.1), transparent);
     display: flex;
     align-items: center;
@@ -719,17 +767,17 @@ header {
         width: 100%;
         max-width: 100%;
     }
-    
+
     .gallery-body {
         border-radius: 0;
     }
-    
+
     .gallery-cornice {
         width: 100%;
         margin-left: 0;
         margin-right: 0;
     }
-    
+
     .gallery-foundation {
         width: 100%;
         margin-left: 0;
@@ -741,10 +789,11 @@ header {
 .telescope-svg {
     position: absolute;
     top: -30px;
-    right: 12%; 
-    width: 140px;  
+    right: 12%;
+    width: 140px;
     height: 140px;
-    z-index: -1; /* Behind the opaque dome — base is naturally hidden */
+    z-index: -1;
+    /* Behind the opaque dome — base is naturally hidden */
     pointer-events: none;
     overflow: visible;
     filter: drop-shadow(0 0 3px rgba(243, 217, 162, 0.4));
@@ -755,6 +804,11 @@ header {
 }
 
 @keyframes scanSky {
-    0% { transform: rotate(15deg); }
-    100% { transform: rotate(65deg); }
+    0% {
+        transform: rotate(15deg);
+    }
+
+    100% {
+        transform: rotate(65deg);
+    }
 }
