@@ -132,7 +132,7 @@ document.getElementById('calendarDownload').addEventListener('click', function (
     const location = locationNode ? locationNode.textContent.replace(/\s+/g, ' ').trim() : "";
 
     const startObj = new Date(`${rawDate} ${rawTime}`);
-    const endObj = new Date(startObj.getTime() + 2 * 60 * 60 * 1000);
+    const endObj = new Date(startObj.getTime() + 1 * 60 * 60 * 1000);
 
     const formatICSDate = (d) => {
         if (isNaN(d.getTime())) return "";
