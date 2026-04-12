@@ -1,0 +1,23 @@
+{
+  "name": "axis-mundi-website",
+  "version": "1.0.0",
+  "description": "Axis Mundi Science Pub Talks website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vasu17/Weird-science-club-website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vasu17/Weird-science-club-website/issues"
+  },
+  "homepage": "https://github.com/vasu17/Weird-science-club-website#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
