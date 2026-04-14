@@ -468,15 +468,16 @@ header {
 .event-description-box {
     margin-top: 40px;
     padding: 30px 40px;
-    background: rgba(11, 16, 26, 0.7);
+    background: rgba(11, 16, 26, 0.1);
     border: 1px solid var(--gold-dark);
     border-radius: 20px;
-    box-shadow: 0 0 20px rgba(11, 16, 26, 0.8), inset 0 0 15px rgba(169, 132, 77, 0.05);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     text-align: center;
     width: 100%;
     max-width: 650px;
     z-index: 2;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .event-description-box h3 {
@@ -492,6 +493,89 @@ header {
     color: var(--gold-dark);
     line-height: 1.6;
     letter-spacing: 0.02em;
+}
+
+/* Abstract Toggle & Sub-box */
+.abstract-container {
+    margin-top: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+[id^="abstract-"].event-description-box {
+    background: transparent;
+    border: 1px solid var(--gold-dark);
+    box-shadow: none;
+}
+
+.abstract-toggle {
+    display: inline-flex;
+    background: rgba(169, 132, 77, 0.08);
+    border: 1px solid rgba(169, 132, 77, 0.4);
+    border-radius: 25px;
+    padding: 4px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.abstract-toggle:hover {
+    border-color: var(--gold-light);
+    background: rgba(169, 132, 77, 0.12);
+}
+
+.abstract-toggle-btn {
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    letter-spacing: 0.1em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 20px;
+}
+
+.abstract-toggle-btn.active {
+    color: var(--bg-color);
+    background: var(--gold-light);
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(243, 217, 162, 0.3);
+}
+
+.abstract-sub-box {
+    width: 100%;
+    background: rgba(169, 132, 77, 0.03);
+    border: 1px solid rgba(169, 132, 77, 0.2);
+    border-radius: 15px;
+    padding: 22px;
+    margin-top: 15px;
+    position: relative;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.abstract-content {
+    display: none;
+    animation: abstractFadeIn 0.5s ease forwards;
+}
+
+.abstract-content.active {
+    display: block;
+}
+
+@keyframes abstractFadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
 .drinks-footer {

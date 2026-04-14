@@ -174,3 +174,25 @@ END:VCALENDAR`;
     document.body.removeChild(tempLink);
     URL.revokeObjectURL(url);
 });
+
+window.toggleAbstract = function (abstractId, event) {
+    const abstractBox = document.getElementById(abstractId);
+    const btns = abstractBox.querySelectorAll('.abstract-toggle-btn');
+    const contents = abstractBox.querySelectorAll('.abstract-content');
+
+    const clickedBtn = event.target.closest('.abstract-toggle-btn');
+    if (!clickedBtn) return;
+
+    const targetLang = clickedBtn.getAttribute('data-lang');
+
+    btns.forEach(btn => btn.classList.remove('active'));
+    clickedBtn.classList.add('active');
+
+    contents.forEach(content => {
+        if (content.classList.contains(targetLang)) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+};
