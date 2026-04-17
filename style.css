@@ -610,6 +610,16 @@ header {
 }
 
 @media (max-width: 700px) {
+    .main-nav {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 0 10px;
+    }
+
+    .main-nav a {
+        font-size: 0.95rem;
+    }
+
     .floating-icons {
         display: none;
     }
