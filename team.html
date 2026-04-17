@@ -26,36 +26,68 @@
         <a href="gallery.html">Gallery</a>
     </nav>
 
-    <div class="poster-container">
-        <div class="arch-frame open-bottom">
-            <div class="top-star">
-                <svg class="top-star-svg" viewBox="0 0 100 100" width="60" height="60" fill="none" stroke="none">
+    <div class="ufo-container" style="margin-top: 60px;">
+        <div class="ufo-dome">
+            <div class="top-star" style="margin-bottom: 5px; margin-top: 0;">
+                <svg class="top-star-svg" viewBox="0 0 100 100" width="40" height="40" fill="none" stroke="none">
                     <path d="M50 0 Q50 45 100 50 Q50 55 50 100 Q50 55 0 50 Q50 45 50 0" fill="currentColor" />
                     <path d="M50 15 Q50 45 85 50 Q50 55 50 85 Q50 55 15 50 Q50 45 50 15" fill="currentColor"
                         transform="rotate(45 50 50)" />
                 </svg>
             </div>
-            <header>
-                <h1 class="title" style="font-size: 3.5rem;">MEET THE<br>TEAM!</h1>
+            <header style="margin-bottom: 0;">
+                <h1 class="title" style="font-size: 3rem; margin-top: -10px;">MEET THE<br>TEAM!</h1>
                 <div class="divider">
                     <span></span>
                     <div class="diamond"></div><span></span>
                 </div>
             </header>
-
-            <div class="content-block" style="padding-bottom: 250px;">
-                <main class="talks-list" style="text-align: center; margin-top: 50px;">
-                    <div class="event-description-box" style="margin-top: 0; margin-left: auto; margin-right: auto;">
-                        <h3>About Us</h3>
-                        <p>Science Pub Talks is organized by a group of enthusiastic researchers and students of physics and
-                            astrophysics, namely Lýdia Štofanová, Barbora Miklošová, Barbora Hudačková, Lea Szakszonová, Vasudevan
-                            Sundararaman, Michal Zajaček (all from Masaryk University), Erik Búš (AV ČR) and Tomáš Ondro (Mendel
-                            University.). Our goal
-                            is to bring science and the latest discoveries to the general public. We invite speakers from Brno and
-                            beyond who specialize in various fields of science.</p>
-                    </div>
-                </main>
+        </div>
+        <div class="ufo-base-svg-container">
+            <svg class="ufo-base-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="ufoGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--gold-light);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:var(--gold-dark);stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- 
+                    Top: 20→180 (matches 80% dome width exactly)
+                    Sides: straight diagonals out to full width
+                    Corners: true quarter-circle arcs (radius 20)
+                    Bottom: perfectly straight horizontal line
+                -->
+                <path d="
+                    M 20 0
+                    L 180 0
+                    L 196 88
+                    C 196 95  192 100  185 100
+                    L 15 100
+                    C 8 100  4 95  4 88
+                    Z"
+                      fill="url(#ufoGradient)"
+                      stroke="none" />
+            </svg>
+            <div class="ufo-lights-container">
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
             </div>
+        </div>
+        <div class="ufo-beam"></div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 150px; position: relative; z-index: 10;">
+        <div class="event-description-box" style="margin-left: auto; margin-right: auto;">
+            <h3>About Us</h3>
+            <p>Science Pub Talks is organized by a group of enthusiastic researchers and students of physics and
+                astrophysics, namely Lýdia Štofanová, Barbora Miklošová, Barbora Hudačková, Lea Szakszonová, Vasudevan
+                Sundararaman, Michal Zajaček (all from Masaryk University), Erik Búš (AV ČR) and Tomáš Ondro (Mendel
+                University.). Our goal
+                is to bring science and the latest discoveries to the general public. We invite speakers from Brno and
+                beyond who specialize in various fields of science.</p>
         </div>
     </div>
 
