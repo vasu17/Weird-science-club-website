@@ -32,4 +32,4 @@ Thumbs.db
 *.swp
 *.swo
 *~
-build_local.bat
+deploy.bat
