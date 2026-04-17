@@ -610,6 +610,16 @@ header {
 }
 
 @media (max-width: 700px) {
+    .main-nav {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 0 10px;
+    }
+
+    .main-nav a {
+        font-size: 0.95rem;
+    }
+
     .floating-icons {
         display: none;
     }
@@ -619,12 +629,14 @@ header {
         border-radius: calc(50vw - 20px) calc(50vw - 20px) 0 0;
         overflow: visible;
         padding-top: 1px;
+        height: auto;
     }
 
     .arch-frame {
         border-radius: calc(50vw - 20px) calc(50vw - 20px) 0 0;
-        padding: 40px 15px 15px;
+        padding: 40px 15px 30px;
         border-width: 1px;
+        min-height: 950px;
     }
 
     .title {
@@ -635,6 +647,16 @@ header {
         width: 95%;
         font-size: 1.1rem;
     }
+
+@media (max-width: 350px) {
+    .arch-frame {
+        padding: 40px 15px 40px;
+        min-height: 1050px;
+    }
+    .title {
+        font-size: 2.8rem;
+    }
+}
 }
 
 /* Open Bottom Arch Frame for infinitely trailing pages */
