@@ -196,3 +196,23 @@ window.toggleAbstract = function (abstractId, event) {
         }
     });
 };
+
+// Science Club Status Toggle
+const statusBox = document.getElementById('statusBox');
+if (statusBox) {
+    let isWaiting = false;
+    statusBox.addEventListener('click', function() {
+        const en = statusBox.querySelector('.status-en');
+        const cz = statusBox.querySelector('.status-cz');
+        
+        if (!isWaiting) {
+            en.textContent = "we will begin again soon";
+            cz.textContent = "Brzy začneme znovu";
+            isWaiting = true;
+        } else {
+            en.textContent = "we will start around 19:15";
+            cz.textContent = "Začneme kolem 19:15";
+            isWaiting = false;
+        }
+    });
+}
