@@ -216,3 +216,88 @@ if (statusBox) {
         }
     });
 }
+
+// Lightbox / Image Viewer Logic
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+const lightboxCaption = document.getElementById('lightbox-caption');
+const lightboxClose = document.querySelector('.lightbox-close');
+const lightboxPrev = document.querySelector('.lightbox-prev');
+const lightboxNext = document.querySelector('.lightbox-next');
+
+let currentIndex = 0;
+let lightboxItems = [];
+
+function updateLightbox() {
+    const item = lightboxItems[currentIndex];
+    lightboxImg.style.opacity = '0';
+    setTimeout(() => {
+        lightboxImg.src = item.src;
+        lightboxCaption.textContent = item.caption;
+        lightboxImg.style.opacity = '1';
+    }, 200);
+
+    // Hide nav buttons if only one image
+    if (lightboxItems.length <= 1) {
+        lightboxPrev.style.display = 'none';
+        lightboxNext.style.display = 'none';
+    } else {
+        lightboxPrev.style.display = 'block';
+        lightboxNext.style.display = 'block';
+    }
+}
+
+function openLightbox(index) {
+    currentIndex = index;
+    updateLightbox();
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+}
+
+function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function showNext() {
+    currentIndex = (currentIndex + 1) % lightboxItems.length;
+    updateLightbox();
+}
+
+function showPrev() {
+    currentIndex = (currentIndex - 1 + lightboxItems.length) % lightboxItems.length;
+    updateLightbox();
+}
+
+// Initialize lightbox triggers
+function initLightbox() {
+    const triggers = document.querySelectorAll('.lightbox-trigger');
+    lightboxItems = Array.from(triggers).map(trigger => ({
+        src: trigger.getAttribute('data-image') || trigger.querySelector('img')?.src,
+        caption: trigger.getAttribute('data-caption') || trigger.querySelector('img')?.alt || ''
+    }));
+
+    triggers.forEach((trigger, index) => {
+        trigger.addEventListener('click', () => openLightbox(index));
+    });
+}
+
+if (lightbox) {
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+    lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target.classList.contains('lightbox-content')) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') showNext();
+        if (e.key === 'ArrowLeft') showPrev();
+    });
+
+    initLightbox();
+}
