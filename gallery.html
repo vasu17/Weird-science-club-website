@@ -70,20 +70,8 @@
                 </header>
             </div>
 
-
-            <div class="gallery-body">
-                <div class="gallery-date-section">
-                    <h2 class="gallery-date">April 27, 2026</h2>
-                    <p class="coming-soon">Coming soon!</p>
-                    <!--
-                    <div class="photo-grid">
-                        <div class="photo-placeholder">Image<br>1</div>
-                        <div class="photo-placeholder">Image<br>2</div>
-                        <div class="photo-placeholder">Image<br>3</div>
-                        <div class="photo-placeholder">Image<br>4</div>
-                    </div>
-                    -->
-                </div>
+            <div class="gallery-body" id="gallery-root">
+                <!-- Gallery items will be injected here by index.js -->
             </div>
             <!-- Removed gallery-foundation completely -->
         </div>
@@ -92,8 +80,8 @@
     <!-- Lightbox Modal -->
     <div id="lightbox" class="lightbox-modal">
         <div class="lightbox-close">&times;</div>
-        <div class="lightbox-nav lightbox-prev">&#10094;</div>
-        <div class="lightbox-nav lightbox-next">&#10095;</div>
+        <div class="lightbox-nav lightbox-prev"><span>&#10094;</span></div>
+        <div class="lightbox-nav lightbox-next"><span>&#10095;</span></div>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="" class="lightbox-image">
         </div>

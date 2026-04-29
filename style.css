@@ -798,9 +798,9 @@ header {
     max-width: 900px;
     width: 100%;
     box-shadow: none;
-    /* No single container shadow — using two separate ones */
     border-radius: 0;
     min-height: auto;
+    height: auto !important;
 }
 
 .gallery-building {
@@ -811,10 +811,7 @@ header {
     margin-bottom: 0px;
     position: relative;
     padding-top: 50px;
-    padding-bottom: 120px;
-    /* Expansive padding for bottomless fade-out */
-    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    padding-bottom: 40px;
 }
 
 .gallery-dome {
@@ -859,12 +856,10 @@ header {
 .gallery-body {
     width: 100%;
     border: 1px solid var(--gold-dark);
-    /* Thin line all around */
     border-bottom: none;
-    border-radius: 12px 12px 12px 12px;
+    border-radius: 12px 12px 0 0;
     padding: 30px 20px 40px;
     background: transparent;
-    /* Shadow 2: Hugs the body's rectangular golden borders */
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.85), inset 4px 0 10px -4px rgba(169, 132, 77, 0.15), inset -4px 0 10px -4px rgba(169, 132, 77, 0.15);
 }
 
@@ -876,24 +871,7 @@ header {
     margin-bottom: 0;
 }
 
-.gallery-date {
-    color: var(--text-color);
-    font-family: 'Outfit', sans-serif;
-    font-weight: 300;
-    font-size: 1.1rem;
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    border-bottom: 1px dotted var(--gold-dark);
-    padding-bottom: 5px;
-    margin-bottom: 20px;
-}
-
-.photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 15px;
-}
+/* gallery-date and photo-grid styles are defined in the dynamic gallery section below */
 
 .photo-placeholder {
     width: 100%;
@@ -1346,7 +1324,7 @@ header {
     max-width: 850px;
     height: 450px;
     margin: 40px auto 20px;
-    background: rgba(11, 16, 26, 0.4);
+    background: rgba(11, 16, 26, 0.8);
     border: 1px solid var(--gold-dark);
     border-radius: 20px;
     position: relative;
@@ -1358,31 +1336,13 @@ header {
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .stylized-image-box:hover {
     border-color: var(--gold-light);
     box-shadow: 0 15px 50px rgba(243, 217, 162, 0.15);
     transform: translateY(-5px);
-}
-
-.stylized-image-box .placeholder-text {
-    font-family: var(--font-serif);
-    color: var(--gold-dark);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    opacity: 0.6;
-    z-index: 2;
-}
-
-.stylized-image-box::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(243, 217, 162, 0.05) 0%, transparent 80%);
-    pointer-events: none;
-    z-index: 1;
 }
 
 .stylized-image-box .corner {
@@ -1398,154 +1358,33 @@ header {
 .stylized-image-box:hover .corner {
     border-color: var(--gold-light);
     opacity: 1;
-    width: 25px;
-    height: 25px;
 }
 
-.stylized-image-box .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-.stylized-image-box .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-.stylized-image-box .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-.stylized-image-box .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+.top-left { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+.top-right { top: 15px; right: 15px; border-left: none; border-bottom: none; }
+.bottom-left { bottom: 15px; left: 15px; border-right: none; border-top: none; }
+.bottom-right { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+
+.stylized-image-box:hover .top-left { top: 10px; left: 10px; }
+.stylized-image-box:hover .top-right { top: 10px; right: 10px; }
+.stylized-image-box:hover .bottom-left { bottom: 10px; left: 10px; }
+.stylized-image-box:hover .bottom-right { bottom: 10px; right: 10px; }
 
 .team-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    opacity: 0.85;
-    transition: all 0.5s ease;
+    object-fit: contain;
+    padding: 15px;
+    transition: all 0.6s ease;
     filter: sepia(0.2) contrast(1.1);
-    z-index: 0;
 }
 
 .stylized-image-box:hover .team-image {
-    opacity: 1;
+    transform: scale(1.02);
     filter: sepia(0) contrast(1.2);
-    transform: scale(1.05);
 }
 
-.stylized-image-box::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 60%, rgba(11, 16, 26, 0.8) 100%);
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Lightbox / Image Viewer */
-.lightbox-modal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    inset: 0;
-    background: rgba(6, 8, 13, 0.95);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.lightbox-modal.active {
-    display: flex;
-    opacity: 1;
-}
-
-.lightbox-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(243, 217, 162, 0.2);
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--bg-color);
-}
-
-.lightbox-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-    animation: zoomIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-@keyframes zoomIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.lightbox-close {
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    color: var(--gold-light);
-    font-size: 3rem;
-    cursor: pointer;
-    line-height: 1;
-    transition: all 0.3s ease;
-    z-index: 10001;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightbox-close:hover {
-    color: #fff;
-    transform: rotate(90deg);
-}
-
-.lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gold-light);
-    font-size: 3rem;
-    cursor: pointer;
-    padding: 20px;
-    user-select: none;
-    transition: all 0.3s ease;
-    opacity: 0.6;
-    z-index: 10001;
-}
-
-.lightbox-nav:hover {
-    opacity: 1;
-    color: #fff;
-    text-shadow: 0 0 15px var(--gold-light);
-}
-
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
-
-.lightbox-caption {
-    margin-top: 25px;
-    color: var(--gold-light);
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    letter-spacing: 0.1em;
-    text-align: center;
-    max-width: 800px;
-}
-
-/* Update stylized box for interaction */
-.stylized-image-box {
-    cursor: pointer;
-}
-
-.team-image {
-    object-fit: contain !important;
-}
-
-/* Enhanced Dedicated Image Viewer */
+/* Enhanced Dedicated Image Viewer (Lightbox) */
 .lightbox-modal {
     display: none;
     position: fixed;
@@ -1574,7 +1413,6 @@ header {
     align-items: center;
     justify-content: center;
     background: transparent;
-    overflow: visible;
 }
 
 .lightbox-image {
@@ -1606,7 +1444,7 @@ header {
 .lightbox-close:hover {
     opacity: 1;
     color: #fff;
-    transform: scale(1.1);
+    transform: rotate(90deg) scale(1.1);
 }
 
 .lightbox-nav {
@@ -1615,21 +1453,84 @@ header {
     transform: translateY(-50%);
     width: 60px;
     height: 60px;
-    background: rgba(169, 132, 77, 0.1);
-    border: 1px solid rgba(169, 132, 77, 0.3);
+    background: rgba(169, 132, 77, 0.15);
+    border: 1px solid rgba(169, 132, 77, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold-light);
-    font-size: 1.5rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 10002;
-    user-select: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10005;
+    background-size: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
+.lightbox-nav span {
+    display: none; /* Hide the text character */
+}
+
+.lightbox-prev {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f3d9a2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E");
+    background-position: 45% center;
+}
+
+.lightbox-next {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f3d9a2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+    background-position: 55% center;
+}
+
+/* Gallery Expand/Collapse Styles */
+.gallery-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted var(--gold-dark);
+}
+
+.gallery-date-section .gallery-date {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.gallery-toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 35px;
+    margin-bottom: 20px;
+}
+
+.gallery-toggle-btn {
+    background: rgba(11, 16, 26, 0.6);
+    border: 1px solid var(--gold-dark);
+    color: var(--gold-light);
+    padding: 8px 25px;
+    border-radius: 30px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.gallery-toggle-btn:hover {
+    background: rgba(169, 132, 77, 0.15);
+    border-color: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(243, 217, 162, 0.15);
+}
+
+/* Remove old hidden rule */
+/* .photo-grid.collapsed { display: none; } */
+
 .lightbox-nav:hover {
+
     background: rgba(169, 132, 77, 0.2);
     border-color: var(--gold-light);
     color: #fff;
@@ -1644,7 +1545,7 @@ header {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(11, 16, 26, 0.6);
+    background: rgba(11, 16, 26, 0.8);
     padding: 10px 30px;
     border-radius: 30px;
     border: 1px solid rgba(169, 132, 77, 0.2);
@@ -1655,16 +1556,6 @@ header {
     backdrop-filter: blur(10px);
     z-index: 10002;
     white-space: nowrap;
-}
-
-/* Fix for the main page image box to show WHOLE image better */
-.stylized-image-box {
-    background: rgba(11, 16, 26, 0.6);
-    border: 1px solid rgba(169, 132, 77, 0.4);
-}
-
-.team-image {
-    padding: 20px; /* Give some breathing room to show the "whole" image clearly */
 }
 
 /* Past Events Stylized Boxes */
@@ -1732,4 +1623,57 @@ header {
     color: var(--gold-dark);
     font-weight: 400;
     letter-spacing: 0.05em;
+}
+
+/* Dynamic Gallery Styles */
+.gallery-date-section {
+    margin-bottom: 80px;
+}
+
+.gallery-date {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    color: var(--gold-light);
+    margin-bottom: 30px;
+    padding-left: 20px;
+    border-left: 4px solid var(--gold-dark);
+    letter-spacing: 0.1em;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    overflow: hidden;
+    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    opacity: 1;
+    max-height: 400px; /* Default collapsed height to show ~2 images/1 row */
+}
+
+.photo-item {
+    aspect-ratio: 1;
+    background: rgba(11, 16, 26, 0.4);
+    border: 1px solid rgba(169, 132, 77, 0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.photo-item:hover {
+    border-color: var(--gold-light);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.photo-item:hover img {
+    transform: scale(1.1);
 }

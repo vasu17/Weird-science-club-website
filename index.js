@@ -9,33 +9,21 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Arch-curve icon tracking
-// The arch is border-radius: 300px on a 600px wide container.
-// This means the top corners each have a quarter-circle of radius 300px.
-// At vertical offset y from the container top (0–300px), the LEFT border x-position is:
-//   archX(y) = R - sqrt(R^2 - (R - y)^2)   where R = 300
-// Below y=300, the borders are straight (archX = 0).
-// We read each icon's actual rendered Y, compute archX, and translateX by that amount
-// so the icon tracks the curve regardless of spacing/size.
 function alignIconsToArch() {
-    const R = 300; // arch corner radius in px, matches CSS border-radius
-    const GAP = 12; // extra px to keep icons outside the border
+    const R = 300; 
+    const GAP = 12; 
 
     ['left', 'right'].forEach(side => {
         const col = document.querySelector(`.floating-icons.${side}`);
         if (!col) return;
-        const colRect = col.getBoundingClientRect();
         const containerRect = col.parentElement.getBoundingClientRect();
 
         col.querySelectorAll('.icon').forEach(icon => {
             const iconRect = icon.getBoundingClientRect();
-            // Y position of icon centre relative to container top
             const iconCenterY = (iconRect.top + iconRect.height / 2) - containerRect.top;
-            // Horizontal inset of the arch at this Y
             const archInset = iconCenterY < R
                 ? R - Math.sqrt(R * R - (R - iconCenterY) * (R - iconCenterY))
                 : 0;
-            // Shift icon inward by that amount using margin (not transform, to avoid fighting the float animation)
             const shift = archInset + GAP;
             if (side === 'left') {
                 icon.style.marginLeft = `${shift}px`;
@@ -48,16 +36,13 @@ function alignIconsToArch() {
     });
 }
 
-// Run once after layout settles, and again on resize
 window.addEventListener('load', alignIconsToArch);
 window.addEventListener('resize', alignIconsToArch);
-// Also run after a short delay to catch any deferred layout
 setTimeout(alignIconsToArch, 100);
 
-
 const stars = [];
-const numStars = 700; // Scaled down for the tighter radius
-const maxR = 1500; // Smaller maximum radius forces much tighter, highly visible curved orbits
+const numStars = 700;
+const maxR = 1500;
 
 for (let i = 0; i < numStars; i++) {
     const r = Math.sqrt(Math.random()) * maxR;
@@ -77,28 +62,19 @@ let globalRotation = 0;
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Elegant and highly perceptible curve speed 
     globalRotation -= 0.0008;
-
     ctx.save();
-
-    // Position the North Star right above the center of the screen
     ctx.translate(canvas.width / 2, -50);
     ctx.rotate(globalRotation);
-
-    // Draw stars
     for (const star of stars) {
         star.angle += star.twinkleSpeed;
         const alpha = star.baseAlpha + Math.sin(star.angle) * 0.4;
         const boundedAlpha = Math.max(0.05, Math.min(1, alpha));
-
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${star.color}, ${boundedAlpha})`;
         ctx.fill();
     }
-
     ctx.restore();
     requestAnimationFrame(animate);
 }
@@ -108,48 +84,38 @@ animate();
 window.switchTab = function (tabId, event) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
-
     document.getElementById('upcoming-talks').style.display = 'none';
     document.getElementById('past-talks').style.display = 'none';
-
     document.getElementById(tabId + '-talks').style.display = 'block';
 };
 
-document.getElementById('calendarDownload').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    const upcomingTalks = document.querySelectorAll('#upcoming-talks .talk');
-    let description = "Upcoming Speakers:\\n";
-    upcomingTalks.forEach(talk => {
-        const title = talk.querySelector('h3').textContent.trim();
-        const speaker = talk.querySelector('p').textContent.trim();
-        description += `- ${title} // ${speaker}\\n`;
-    });
-
-    const rawDate = document.getElementById('eventDate').textContent.trim().replace("'", "20");
-    const rawTime = document.getElementById('eventTime').textContent.trim();
-    const locationNode = document.querySelector('.location');
-    const location = locationNode ? locationNode.textContent.replace(/\s+/g, ' ').trim() : "";
-
-    const startObj = new Date(`${rawDate} ${rawTime}`);
-    const endObj = new Date(startObj.getTime() + 1 * 60 * 60 * 1000);
-
-    const formatICSDate = (d) => {
-        if (isNaN(d.getTime())) return "";
-        return d.getUTCFullYear() +
-            String(d.getUTCMonth() + 1).padStart(2, '0') +
-            String(d.getUTCDate()).padStart(2, '0') + 'T' +
-            String(d.getUTCHours()).padStart(2, '0') +
-            String(d.getUTCMinutes()).padStart(2, '0') +
-            String(d.getUTCSeconds()).padStart(2, '0') + 'Z';
-    };
-
-    if (isNaN(startObj.getTime())) {
-        console.error("Date parsed incorrectly: ", rawDate, rawTime);
-        return;
-    }
-
-    const icsContent = `BEGIN:VCALENDAR
+const calendarDownload = document.getElementById('calendarDownload');
+if (calendarDownload) {
+    calendarDownload.addEventListener('click', function (e) {
+        e.preventDefault();
+        const upcomingTalks = document.querySelectorAll('#upcoming-talks .talk');
+        let description = "Upcoming Speakers:\\n";
+        upcomingTalks.forEach(talk => {
+            const title = talk.querySelector('h3').textContent.trim();
+            const speaker = talk.querySelector('p').textContent.trim();
+            description += `- ${title} // ${speaker}\\n`;
+        });
+        const rawDate = document.getElementById('eventDate').textContent.trim().replace("'", "20");
+        const rawTime = document.getElementById('eventTime').textContent.trim();
+        const locationNode = document.querySelector('.location');
+        const location = locationNode ? locationNode.textContent.replace(/\s+/g, ' ').trim() : "";
+        const startObj = new Date(`${rawDate} ${rawTime}`);
+        const endObj = new Date(startObj.getTime() + 1 * 60 * 60 * 1000);
+        const formatICSDate = (d) => {
+            if (isNaN(d.getTime())) return "";
+            return d.getUTCFullYear() +
+                String(d.getUTCMonth() + 1).padStart(2, '0') +
+                String(d.getUTCDate()).padStart(2, '0') + 'T' +
+                String(d.getUTCHours()).padStart(2, '0') +
+                String(d.getUTCMinutes()).padStart(2, '0') +
+                String(d.getUTCSeconds()).padStart(2, '0') + 'Z';
+        };
+        const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Axis Mundi//Science Pub Talks//EN
 BEGIN:VEVENT
@@ -162,49 +128,38 @@ DESCRIPTION:${description}
 LOCATION:${location}
 END:VEVENT
 END:VCALENDAR`;
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-
-    const tempLink = document.createElement('a');
-    tempLink.href = url;
-    tempLink.download = "Axis_Mundi_Talks.ics";
-    document.body.appendChild(tempLink);
-    tempLink.click();
-    document.body.removeChild(tempLink);
-    URL.revokeObjectURL(url);
-});
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const tempLink = document.createElement('a');
+        tempLink.href = url;
+        tempLink.download = "Axis_Mundi_Talks.ics";
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        URL.revokeObjectURL(url);
+    });
+}
 
 window.toggleAbstract = function (abstractId, event) {
     const abstractBox = document.getElementById(abstractId);
     const btns = abstractBox.querySelectorAll('.abstract-toggle-btn');
     const contents = abstractBox.querySelectorAll('.abstract-content');
-
     const clickedBtn = event.target.closest('.abstract-toggle-btn');
     if (!clickedBtn) return;
-
     const targetLang = clickedBtn.getAttribute('data-lang');
-
     btns.forEach(btn => btn.classList.remove('active'));
     clickedBtn.classList.add('active');
-
     contents.forEach(content => {
-        if (content.classList.contains(targetLang)) {
-            content.classList.add('active');
-        } else {
-            content.classList.remove('active');
-        }
+        content.classList.toggle('active', content.classList.contains(targetLang));
     });
 };
 
-// Science Club Status Toggle
 const statusBox = document.getElementById('statusBox');
 if (statusBox) {
     let isWaiting = false;
     statusBox.addEventListener('click', function() {
         const en = statusBox.querySelector('.status-en');
         const cz = statusBox.querySelector('.status-cz');
-        
         if (!isWaiting) {
             en.textContent = "we will begin again soon";
             cz.textContent = "Brzy začneme znovu";
@@ -217,7 +172,7 @@ if (statusBox) {
     });
 }
 
-// Lightbox / Image Viewer Logic
+// Lightbox Logic
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const lightboxCaption = document.getElementById('lightbox-caption');
@@ -230,28 +185,23 @@ let lightboxItems = [];
 
 function updateLightbox() {
     const item = lightboxItems[currentIndex];
+    if (!item) return;
     lightboxImg.style.opacity = '0';
     setTimeout(() => {
         lightboxImg.src = item.src;
         lightboxCaption.textContent = item.caption;
         lightboxImg.style.opacity = '1';
     }, 200);
-
-    // Hide nav buttons if only one image
-    if (lightboxItems.length <= 1) {
-        lightboxPrev.style.display = 'none';
-        lightboxNext.style.display = 'none';
-    } else {
-        lightboxPrev.style.display = 'block';
-        lightboxNext.style.display = 'block';
-    }
+    const hasMultiple = lightboxItems.length > 1;
+    lightboxPrev.style.display = hasMultiple ? 'block' : 'none';
+    lightboxNext.style.display = hasMultiple ? 'block' : 'none';
 }
 
 function openLightbox(index) {
     currentIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
@@ -269,35 +219,129 @@ function showPrev() {
     updateLightbox();
 }
 
-// Initialize lightbox triggers
 function initLightbox() {
     const triggers = document.querySelectorAll('.lightbox-trigger');
     lightboxItems = Array.from(triggers).map(trigger => ({
         src: trigger.getAttribute('data-image') || trigger.querySelector('img')?.src,
         caption: trigger.getAttribute('data-caption') || trigger.querySelector('img')?.alt || ''
     }));
-
     triggers.forEach((trigger, index) => {
-        trigger.addEventListener('click', () => openLightbox(index));
+        trigger.onclick = () => openLightbox(index);
     });
 }
 
 if (lightbox) {
-    lightboxClose.addEventListener('click', closeLightbox);
-    lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
-    lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox || e.target.classList.contains('lightbox-content')) {
-            closeLightbox();
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
+    lightboxClose.onclick = closeLightbox;
+    lightboxPrev.onclick = (e) => { e.stopPropagation(); showPrev(); };
+    lightboxNext.onclick = (e) => { e.stopPropagation(); showNext(); };
+    lightbox.onclick = (e) => { if (e.target === lightbox || e.target.classList.contains('lightbox-content')) closeLightbox(); };
+    document.onkeydown = (e) => {
         if (!lightbox.classList.contains('active')) return;
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowRight') showNext();
         if (e.key === 'ArrowLeft') showPrev();
-    });
-
+    };
     initLightbox();
 }
+
+// Gallery Logic
+const GALLERY_CONFIG = [
+    { 
+        date: "27-04-2026", 
+        folder: "assets/images/27-04-2026", 
+        images: [
+            "20260427_191933.webp",
+            "IMG_0894.webp",
+            "IMG_0899.webp",
+            "IMG_0906.webp",
+            "IMG_0907.webp"
+        ] 
+    }
+];
+
+function formatDate(dateStr) {
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = months[parseInt(parts[1]) - 1];
+    return month ? `${month} ${parseInt(parts[0])}, ${parts[2]}` : dateStr;
+}
+
+function renderGallery() {
+    const root = document.getElementById('gallery-root');
+    if (!root) return;
+    GALLERY_CONFIG.forEach(event => {
+        if (event.images.length === 0) return;
+        const section = document.createElement('div');
+        section.className = 'gallery-date-section';
+        
+        const headerRow = document.createElement('div');
+        headerRow.className = 'gallery-header-row';
+
+        const h2 = document.createElement('h2');
+        h2.className = 'gallery-date';
+        h2.textContent = event.date.includes('-') ? formatDate(event.date) : event.date;
+        
+        headerRow.appendChild(h2);
+        section.appendChild(headerRow);
+
+        const grid = document.createElement('div');
+        grid.className = 'photo-grid';
+        
+        event.images.forEach(imgName => {
+            const path = `${event.folder}/${imgName}`;
+            const item = document.createElement('div');
+            item.className = 'photo-item lightbox-trigger';
+            item.setAttribute('data-image', path);
+            item.setAttribute('data-caption', h2.textContent);
+            
+            const img = document.createElement('img');
+            img.src = path;
+            img.alt = h2.textContent;
+            item.appendChild(img);
+            grid.appendChild(item);
+        });
+
+        section.appendChild(grid);
+
+        // Collapse/Expand Button at the bottom
+        const toggleContainer = document.createElement('div');
+        toggleContainer.className = 'gallery-toggle-container';
+        
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'gallery-toggle-btn';
+        toggleBtn.textContent = 'Expand';
+        
+        let isCollapsed = true;
+        grid.style.maxHeight = '400px';
+        
+        toggleBtn.addEventListener('click', () => {
+            if (isCollapsed) {
+                // Expand
+                grid.style.maxHeight = grid.scrollHeight + 'px';
+                grid.style.opacity = '1';
+                isCollapsed = false;
+                toggleBtn.textContent = 'Collapse';
+                // After animation, remove max-height so new content can flow
+                setTimeout(() => { if(!isCollapsed) grid.style.maxHeight = 'none'; }, 600);
+            } else {
+                // Collapse: first set explicit max-height, then shrink
+                grid.style.maxHeight = grid.scrollHeight + 'px';
+                // Force reflow
+                grid.offsetHeight;
+                grid.style.maxHeight = '400px';
+                grid.style.opacity = '1'; // Keep images visible but limited
+                isCollapsed = true;
+                toggleBtn.textContent = 'Expand';
+            }
+        });
+
+        toggleContainer.appendChild(toggleBtn);
+        section.appendChild(toggleContainer);
+
+        root.appendChild(section);
+    });
+    initLightbox();
+}
+
+window.addEventListener('DOMContentLoaded', renderGallery);
