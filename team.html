@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axis Mundi - Meet the Team!</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</head>
+
+<body>
+    <canvas id="starsCanvas"></canvas>
+
+    <nav class="main-nav">
+        <a href="index.html">Upcoming Events</a>
+        <a href="past_events.html">Past Events</a>
+        <a href="team.html" class="active">Meet the Team!</a>
+        <a href="gallery.html">Gallery</a>
+    </nav>
+
+    <div class="ufo-container" style="margin-top: 60px;">
+        <div class="ufo-dome">
+            <div class="top-star" style="margin-bottom: 5px; margin-top: 0;">
+                <svg class="top-star-svg" viewBox="0 0 100 100" width="40" height="40" fill="none" stroke="none">
+                    <path d="M50 0 Q50 45 100 50 Q50 55 50 100 Q50 55 0 50 Q50 45 50 0" fill="currentColor" />
+                    <path d="M50 15 Q50 45 85 50 Q50 55 50 85 Q50 55 15 50 Q50 45 50 15" fill="currentColor"
+                        transform="rotate(45 50 50)" />
+                </svg>
+            </div>
+            <header style="margin-bottom: 0;">
+                <h1 class="title ufo-title">About us!</h1>
+                <div class="divider">
+                    <span></span>
+                    <div class="diamond"></div><span></span>
+                </div>
+            </header>
+        </div>
+        <div class="ufo-base-svg-container">
+            <svg class="ufo-base-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="ufoGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--gold-light);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:var(--gold-dark);stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- 
+                    Top: 20→180 (matches 80% dome width exactly)
+                    Sides: straight diagonals out to full width
+                    Corners: true quarter-circle arcs (radius 20)
+                    Bottom: perfectly straight horizontal line
+                -->
+                <path d="
+                    M 20 0
+                    L 180 0
+                    L 196 88
+                    C 196 95  192 100  185 100
+                    L 15 100
+                    C 8 100  4 95  4 88
+                    Z" fill="url(#ufoGradient)" stroke="none" />
+            </svg>
+            <div class="ufo-lights-container">
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+                <div class="ufo-light"></div>
+            </div>
+        </div>
+        <div class="ufo-beam"></div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 40px; position: relative; z-index: 10;">
+        <div class="event-description-box" style="margin-left: auto; margin-right: auto;">
+            <h3>What is this?</h3>
+            <p>Science Pub Talks is organized by a group of enthusiastic researchers and students of theoretical and
+                astro physics. Inspired by <a href="https://astronomyontap.org/" target="_blank">astronomy on tap</a>,
+                our goal is to bring science and the latest discoveries to
+                the general public. We invite speakers from Brno and
+                beyond who specialize in various fields of science.</p>
+        </div>
+    </div>
+    <div style="text-align: center; margin-bottom: 100px; position: relative; z-index: 10;">
+        <div class="event-description-box who-we-are-box" style="margin-left: auto; margin-right: auto;">
+            <h3>Who are we?</h3>
+            <p>Lýdia Štofanová, Barbora Miklošová, Barbora Hudačková, Lea Szakszonová, Vasudevan Sundararaman, Michal
+                Zajaček (all from Masaryk University), Erik Búš (AV ČR) and Tomáš Ondro (Mendel University.)</p>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
