@@ -1707,7 +1707,8 @@ header {
     padding: 30px 25px;
     border-bottom: 1px solid rgba(169, 132, 77, 0.15);
     text-align: left;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
 }
 
 .past-talk-box:last-child {
@@ -1715,7 +1716,8 @@ header {
 }
 
 .past-talk-box:hover {
-    background: rgba(169, 132, 77, 0.05);
+    background: rgba(169, 132, 77, 0.08);
+    transform: translateX(10px);
 }
 
 .past-talk-title {
@@ -1735,6 +1737,126 @@ header {
     color: var(--gold-dark);
     font-weight: 400;
     letter-spacing: 0.05em;
+}
+
+
+/* Event Modal Specific Styles */
+#event-modal.lightbox-modal {
+    background: rgba(3, 5, 10, 0.7);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.event-modal-container {
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    background: rgba(11, 16, 26, 0.4);
+    border: 1px solid var(--gold-dark);
+    border-radius: 30px;
+    padding: 50px;
+    overflow-y: auto;
+    position: relative;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(169, 132, 77, 0.1);
+}
+
+.event-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-title {
+    font-family: var(--font-serif);
+    font-size: 2.8rem;
+    color: var(--gold-light);
+    line-height: 1.1;
+    text-shadow: 0 0 20px rgba(243, 217, 162, 0.3);
+}
+
+.modal-speaker {
+    font-size: 1.3rem;
+    color: var(--gold-dark);
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.modal-divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--gold-dark), transparent);
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.modal-abstract-section {
+    margin-top: 10px;
+}
+
+.modal-abstract-box {
+    margin-top: 20px;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    color: #e0e0e0;
+}
+
+.modal-abstract-text {
+    display: none;
+}
+
+.modal-abstract-text.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+.modal-footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.download-slides-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    background: transparent;
+    border: 1px solid var(--gold-light);
+    color: var(--gold-light);
+    border-radius: 30px;
+    text-decoration: none;
+    font-family: var(--font-serif);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.download-slides-btn:hover {
+    background: var(--gold-light);
+    color: var(--bg-color);
+    box-shadow: 0 0 20px rgba(243, 217, 162, 0.4);
+    transform: translateY(-3px);
+}
+
+.download-icon {
+    width: 18px;
+    height: 18px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .event-modal-container {
+        padding: 30px 20px;
+    }
+    .modal-title {
+        font-size: 2rem;
+    }
 }
 
 /* Dynamic Gallery Styles */

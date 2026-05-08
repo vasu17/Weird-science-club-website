@@ -344,4 +344,89 @@ function renderGallery() {
     initLightbox();
 }
 
-window.addEventListener('DOMContentLoaded', renderGallery);
+// Event Modal Logic
+function initEventModal() {
+    const eventModal = document.getElementById('event-modal');
+    if (!eventModal) return;
+
+    const modalTitle = document.getElementById('modal-title');
+    const modalSpeaker = document.getElementById('modal-speaker');
+    const modalAbstractEn = document.getElementById('modal-abstract-en');
+    const modalAbstractCz = document.getElementById('modal-abstract-cz');
+    const modalSlides = document.getElementById('modal-slides');
+    const modalClose = document.getElementById('modal-close');
+    const abstractToggle = document.getElementById('modal-abstract-toggle');
+
+    const pastTalkBoxes = document.querySelectorAll('.past-talk-box');
+
+    pastTalkBoxes.forEach(box => {
+        box.addEventListener('click', () => {
+            const title = box.getAttribute('data-title');
+            const speaker = box.getAttribute('data-speaker');
+            const abstractEn = box.getAttribute('data-abstract-en');
+            const abstractCz = box.getAttribute('data-abstract-cz');
+            const slidesUrl = box.getAttribute('data-slides');
+
+            modalTitle.textContent = title;
+            modalSpeaker.textContent = speaker;
+            modalAbstractEn.textContent = abstractEn;
+            modalAbstractCz.textContent = abstractCz;
+            if (modalSlides) {
+                modalSlides.href = slidesUrl || '#';
+            }
+
+            // Show modal
+            eventModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Reset abstract toggle to English
+            if (abstractToggle) {
+                abstractToggle.querySelectorAll('.abstract-toggle-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-lang') === 'en');
+                });
+                modalAbstractEn.classList.add('active');
+                modalAbstractCz.classList.remove('active');
+            }
+        });
+    });
+
+    if (modalClose) {
+        modalClose.onclick = () => {
+            eventModal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    }
+
+    if (abstractToggle) {
+        abstractToggle.onclick = (e) => {
+            const btn = e.target.closest('.abstract-toggle-btn');
+            if (!btn) return;
+
+            const lang = btn.getAttribute('data-lang');
+            
+            abstractToggle.querySelectorAll('.abstract-toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (lang === 'en') {
+                modalAbstractEn.classList.add('active');
+                modalAbstractCz.classList.remove('active');
+            } else {
+                modalAbstractEn.classList.remove('active');
+                modalAbstractCz.classList.add('active');
+            }
+        };
+    }
+
+    // Close on background click
+    eventModal.onclick = (e) => {
+        if (e.target === eventModal || e.target.classList.contains('event-modal-container')) {
+            eventModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    renderGallery();
+    initEventModal();
+});
