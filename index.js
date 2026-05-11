@@ -377,6 +377,8 @@ function initEventModal() {
             modalAbstractCz.textContent = abstractCz;
 
             // Reset modal state
+            const container = eventModal.querySelector('.event-modal-container');
+            container.classList.remove('expanded');
             modalAbstractSection.style.display = 'block';
             modalSlidesContainer.style.display = 'none';
             slidesIframe.src = '';
@@ -388,6 +390,7 @@ function initEventModal() {
                 
                 // Store slides URL for the viewer
                 viewSlidesBtn.onclick = () => {
+                    container.classList.add('expanded');
                     modalAbstractSection.style.display = 'none';
                     modalSlidesContainer.style.display = 'block';
                     viewSlidesBtn.style.display = 'none';
@@ -396,7 +399,6 @@ function initEventModal() {
                     let publicUrl;
                     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                         // Fallback for local development: Use the public GitHub URL
-                        // This allows the Office Viewer to "see" the file while you are on localhost.
                         const repoBase = "https://raw.githubusercontent.com/vasu17/Weird-science-club-website/main/";
                         publicUrl = repoBase + slidesUrl;
                     } else {
@@ -411,9 +413,10 @@ function initEventModal() {
                 downloadSlidesBtn.style.display = 'none';
             }
 
-            // Show modal
+            // Show modal — lock background scroll
             eventModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
 
             // Reset abstract toggle to English
             if (abstractToggle) {
@@ -440,6 +443,7 @@ function initEventModal() {
         modalClose.onclick = () => {
             eventModal.classList.remove('active');
             document.body.style.overflow = '';
+            document.documentElement.style.overflow = ''; // restore html scroll
             slidesIframe.src = ''; // Stop iframe content
         };
     }
@@ -469,6 +473,7 @@ function initEventModal() {
         if (e.target === eventModal || e.target.classList.contains('event-modal-container')) {
             eventModal.classList.remove('active');
             document.body.style.overflow = '';
+            document.documentElement.style.overflow = ''; // restore html scroll
         }
     };
 }

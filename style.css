@@ -1,3 +1,23 @@
+/* ── Custom Scrollbar ─────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.9), 0 0 18px rgba(212, 175, 55, 0.4);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #f5e092;
+    box-shadow: 0 0 12px rgba(245, 224, 146, 1), 0 0 28px rgba(245, 224, 146, 0.6);
+}
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: #d4af37 transparent; }
+/* ────────────────────────────────────────────────── */
+
+
+
 :root {
     --bg-color: #0b101a;
     --gold-light: #f3d9a2;
@@ -14,6 +34,8 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: #06080d; /* darkest gradient stop — prevents white flash */
+    overflow-y: overlay;       /* scrollbar overlays content at all zoom levels */
 }
 
 body {
@@ -27,6 +49,7 @@ body {
     align-items: center;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: overlay; /* scrollbar overlays content, no separate track panel */
     position: relative;
     padding: 60px 20px;
 }
@@ -1672,7 +1695,8 @@ header {
 
 .modal-slides-container {
     width: 100%;
-    flex: 1; /* Allow to grow */
+    flex: 1;
+    /* Allow to grow */
     margin-top: 20px;
     border-radius: 12px;
     overflow: hidden;
@@ -1682,12 +1706,14 @@ header {
 }
 
 #slides-iframe {
-    height: 65vh; /* Larger iframe */
+    height: 65vh;
+    /* Larger iframe */
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
 }
 
-.view-slides-btn, .download-slides-btn {
+.view-slides-btn,
+.download-slides-btn {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -1727,7 +1753,8 @@ header {
     filter: brightness(1.1);
 }
 
-.view-slides-btn .meta-icon, .download-slides-btn .download-icon {
+.view-slides-btn .meta-icon,
+.download-slides-btn .download-icon {
     width: 18px;
     height: 18px;
 }
@@ -1811,23 +1838,40 @@ header {
 
 .event-modal-container {
     width: 90vw;
-    max-width: 1400px; /* Much larger for 80% feel */
-    height: 85vh;
+    max-width: 700px;
+    /* Small default for abstracts */
+    height: auto;
+    max-height: 85vh;
     background: rgba(11, 16, 26, 0.4);
     border: 1px solid var(--gold-dark);
     border-radius: 30px;
-    padding: 50px;
-    overflow-y: auto;
+    padding: 30px 0;
+    /* Padding matches border-radius to inset scrollbar */
+    overflow: hidden;
+    /* Hide outer scrollbar */
     position: relative;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(169, 132, 77, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.event-modal-container.expanded {
+    max-width: 1400px;
+    /* Large for slides */
+    height: 85vh;
 }
 
 .event-modal-content {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    padding: 20px 50px;
+    overflow-y: overlay;
+    min-height: 0;
+    overscroll-behavior: contain; /* prevent scroll chaining to background page */
 }
 
 .modal-title {
@@ -1908,17 +1952,26 @@ header {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 600px) {
     .event-modal-container {
         padding: 30px 20px;
     }
+
     .modal-title {
         font-size: 2rem;
     }
+
     .lightbox-close {
         top: 10px;
         right: 10px;
