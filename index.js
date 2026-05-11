@@ -353,7 +353,11 @@ function initEventModal() {
     const modalSpeaker = document.getElementById('modal-speaker');
     const modalAbstractEn = document.getElementById('modal-abstract-en');
     const modalAbstractCz = document.getElementById('modal-abstract-cz');
-    const modalSlides = document.getElementById('modal-slides');
+    const modalAbstractSection = document.getElementById('modal-abstract-section');
+    const modalSlidesContainer = document.getElementById('modal-slides-container');
+    const slidesIframe = document.getElementById('slides-iframe');
+    const viewSlidesBtn = document.getElementById('view-slides-btn');
+    const downloadSlidesBtn = document.getElementById('modal-slides-download');
     const modalClose = document.getElementById('modal-close');
     const abstractToggle = document.getElementById('modal-abstract-toggle');
 
@@ -371,8 +375,40 @@ function initEventModal() {
             modalSpeaker.textContent = speaker;
             modalAbstractEn.textContent = abstractEn;
             modalAbstractCz.textContent = abstractCz;
-            if (modalSlides) {
-                modalSlides.href = slidesUrl || '#';
+
+            // Reset modal state
+            modalAbstractSection.style.display = 'block';
+            modalSlidesContainer.style.display = 'none';
+            slidesIframe.src = '';
+
+            if (slidesUrl && slidesUrl !== '#') {
+                viewSlidesBtn.style.display = 'inline-flex';
+                downloadSlidesBtn.style.display = 'inline-flex';
+                downloadSlidesBtn.href = slidesUrl;
+                
+                // Store slides URL for the viewer
+                viewSlidesBtn.onclick = () => {
+                    modalAbstractSection.style.display = 'none';
+                    modalSlidesContainer.style.display = 'block';
+                    viewSlidesBtn.style.display = 'none';
+                    
+                    // Construct Office Viewer URL
+                    let publicUrl;
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        // Fallback for local development: Use the public GitHub URL
+                        // This allows the Office Viewer to "see" the file while you are on localhost.
+                        const repoBase = "https://raw.githubusercontent.com/vasu17/Weird-science-club-website/main/";
+                        publicUrl = repoBase + slidesUrl;
+                    } else {
+                        // Production URL
+                        publicUrl = window.location.origin + '/' + slidesUrl;
+                    }
+                    
+                    slidesIframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(publicUrl)}`;
+                };
+            } else {
+                viewSlidesBtn.style.display = 'none';
+                downloadSlidesBtn.style.display = 'none';
             }
 
             // Show modal
@@ -390,10 +426,21 @@ function initEventModal() {
         });
     });
 
+    // Special behavior: clicking the abstract section can also reveal the slides button if not visible
+    if (modalAbstractSection) {
+        modalAbstractSection.addEventListener('click', () => {
+            if (viewSlidesBtn.style.display !== 'none') {
+                // If the user clicks the abstract, we can trigger the view slides action
+                viewSlidesBtn.click();
+            }
+        });
+    }
+
     if (modalClose) {
         modalClose.onclick = () => {
             eventModal.classList.remove('active');
             document.body.style.overflow = '';
+            slidesIframe.src = ''; // Stop iframe content
         };
     }
 

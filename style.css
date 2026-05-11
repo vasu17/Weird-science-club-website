@@ -1670,6 +1670,66 @@ header {
     white-space: nowrap;
 }
 
+.modal-slides-container {
+    width: 100%;
+    flex: 1; /* Allow to grow */
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(243, 217, 162, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+#slides-iframe {
+    height: 65vh; /* Larger iframe */
+}
+
+.view-slides-btn, .download-slides-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    margin: 5px;
+}
+
+.view-slides-btn {
+    background: rgba(243, 217, 162, 0.1);
+    color: #f3d9a2;
+    border: 1px solid rgba(243, 217, 162, 0.3);
+}
+
+.view-slides-btn:hover {
+    background: rgba(243, 217, 162, 0.2);
+    border-color: #f3d9a2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(243, 217, 162, 0.1);
+}
+
+.download-slides-btn {
+    background: linear-gradient(135deg, #f3d9a2, #a9844d);
+    color: #0c121d;
+}
+
+.download-slides-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(243, 217, 162, 0.3);
+    filter: brightness(1.1);
+}
+
+.view-slides-btn .meta-icon, .download-slides-btn .download-icon {
+    width: 18px;
+    height: 18px;
+}
+
 /* Past Events Stylized Boxes */
 .past-event-card {
     width: 100%;
@@ -1748,9 +1808,9 @@ header {
 }
 
 .event-modal-container {
-    width: 90%;
-    max-width: 700px;
-    max-height: 85vh;
+    width: 90vw;
+    max-width: 1400px; /* Much larger for 80% feel */
+    height: 85vh;
     background: rgba(11, 16, 26, 0.4);
     border: 1px solid var(--gold-dark);
     border-radius: 30px;

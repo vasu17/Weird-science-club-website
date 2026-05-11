@@ -55,7 +55,7 @@
                             data-speaker="Barbora Hudáčková, MUNI" 
                             data-abstract-en="With the recent success of the Artemis II mission, the next era of human space exploration is officially underway. This presentation explores the goals and timeline of NASA’s Artemis program, detailing our shift from simply visiting the Moon to establishing a sustained human presence. We will break down the cutting-edge hardware driving these missions, contrasting NASA's Space Launch System (SLS) and Orion spacecraft with the innovative commercial landers developed by SpaceX and Blue Origin. Along with highlighting key moments and new imagery from the Artemis II crewed flyby, we will look ahead to the upcoming surface missions and the development of lunar infrastructure."
                             data-abstract-cz="S nedávným úspěchem mise Artemis II oficiálně odstartovala nová éra pilotovaného průzkumu vesmíru. Tato prezentace zkoumá cíle a harmonogram programu Artemis od NASA a detailně přibližuje náš posun od pouhých návštěv Měsíce k vybudování trvalé lidské přítomnosti. Podrobně rozebereme špičkové technologie, které tyto mise umožňují, a porovnáme nosnou raketu Space Launch System (SLS) a kosmickou loď Orion z dílny NASA s inovativními komerčními přistávacími moduly od společností SpaceX a Blue Origin. Kromě připomenutí klíčových okamžiků a představení nových snímků z pilotovaného obletu mise Artemis II se podíváme také do budoucnosti na nadcházející povrchové mise a budování lunární infrastruktury."
-                            data-slides="#">
+                            data-slides="assets/Slides/Artemis Mission 2026-04-27.pptx">
                             <div class="past-talk-title">Artemis Mission</div>
                             <div class="past-talk-speaker">Barbora Hudáčková, MUNI</div>
                         </div>
@@ -84,7 +84,7 @@
                 <p id="modal-speaker" class="modal-speaker"></p>
                 <div class="modal-divider"></div>
                 
-                <div class="modal-abstract-section">
+                <div class="modal-abstract-section" id="modal-abstract-section">
                     <div class="abstract-toggle" id="modal-abstract-toggle">
                         <div class="abstract-toggle-btn active" data-lang="en">English</div>
                         <div class="abstract-toggle-btn" data-lang="cz">Čeština</div>
@@ -95,15 +95,27 @@
                     </div>
                 </div>
 
+                <!-- Slides Container (hidden by default) -->
+                <div id="modal-slides-container" class="modal-slides-container" style="display: none;">
+                    <iframe id="slides-iframe" src="" width="100%" height="450px" frameborder="0"></iframe>
+                </div>
+
                 <div class="modal-footer">
-                    <!-- <a id="modal-slides" href="#" target="_blank" class="download-slides-btn">
+                    <button id="view-slides-btn" class="view-slides-btn" style="display: none;">
+                        <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View Slides
+                    </button>
+                    <a id="modal-slides-download" href="#" download class="download-slides-btn" style="display: none;">
                         <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
                         Download Slides
-                    </a> -->
+                    </a>
                 </div>
             </div>
         </div>
