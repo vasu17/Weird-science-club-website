@@ -1683,6 +1683,8 @@ header {
 
 #slides-iframe {
     height: 65vh; /* Larger iframe */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .view-slides-btn, .download-slides-btn {
