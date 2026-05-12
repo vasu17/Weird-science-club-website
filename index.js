@@ -1,6 +1,11 @@
+/* --- Setup & Canvas Initialization --- */
 const canvas = document.getElementById('starsCanvas');
 const ctx = canvas.getContext('2d');
 
+/**
+ * Resizes the canvas to fill the entire window viewport.
+ * Called initially and whenever the window is resized.
+ */
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -9,8 +14,15 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+/**
+ * Aligns the floating science icons along the curved edge of the poster arch.
+ * It uses the equation of a circle to calculate the horizontal shift required 
+ * for an icon based on its vertical position relative to the arch's top radius.
+ */
 function alignIconsToArch() {
+    // R is the radius of the top semicircular arch (300px based on border-radius).
     const R = 300; 
+    // Minimum gap in pixels between the icon and the arch border.
     const GAP = 12; 
 
     ['left', 'right'].forEach(side => {
@@ -20,7 +32,11 @@ function alignIconsToArch() {
 
         col.querySelectorAll('.icon').forEach(icon => {
             const iconRect = icon.getBoundingClientRect();
+            // Calculate the Y coordinate of the icon's center relative to the arch container.
             const iconCenterY = (iconRect.top + iconRect.height / 2) - containerRect.top;
+            
+            // Calculate horizontal offset to follow the curve using Pythagoras: x = R - sqrt(R^2 - y^2)
+            // Only apply the offset if the icon falls within the top curved area (iconCenterY < R).
             const archInset = iconCenterY < R
                 ? R - Math.sqrt(R * R - (R - iconCenterY) * (R - iconCenterY))
                 : 0;
@@ -40,10 +56,14 @@ window.addEventListener('load', alignIconsToArch);
 window.addEventListener('resize', alignIconsToArch);
 setTimeout(alignIconsToArch, 100);
 
+/* --- Canvas Star Animation Logic --- */
+
 const stars = [];
 const numStars = 700;
 const maxR = 1500;
 
+// Initialize stars with random polar coordinates (radius and angle)
+// to simulate a rotating galaxy background scattered across the canvas.
 for (let i = 0; i < numStars; i++) {
     const r = Math.sqrt(Math.random()) * maxR;
     const t = Math.random() * Math.PI * 2;
@@ -60,6 +80,11 @@ for (let i = 0; i < numStars; i++) {
 
 let globalRotation = 0;
 
+/**
+ * Main animation loop for the canvas. 
+ * Clears the canvas, gently rotates the entire coordinate system to simulate
+ * a slowly spinning night sky, and draws each star with a twinkling alpha effect.
+ */
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     globalRotation -= 0.0008;
@@ -81,6 +106,13 @@ function animate() {
 
 animate();
 
+/* --- UI Interactions --- */
+
+/**
+ * Switches between upcoming and past talks tabs.
+ * @param {string} tabId - The ID prefix of the tab to display ('upcoming' or 'past').
+ * @param {Event} event - The click event object to set the active state on the button.
+ */
 window.switchTab = function (tabId, event) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
@@ -106,6 +138,8 @@ if (calendarDownload) {
         const location = locationNode ? locationNode.textContent.replace(/\s+/g, ' ').trim() : "";
         const startObj = new Date(`${rawDate} ${rawTime}`);
         const endObj = new Date(startObj.getTime() + 1 * 60 * 60 * 1000);
+        
+        // Helper function to format JS Date objects into ICS datetime strings (YYYYMMDDTHHMMSSZ)
         const formatICSDate = (d) => {
             if (isNaN(d.getTime())) return "";
             return d.getUTCFullYear() +
@@ -115,6 +149,8 @@ if (calendarDownload) {
                 String(d.getUTCMinutes()).padStart(2, '0') +
                 String(d.getUTCSeconds()).padStart(2, '0') + 'Z';
         };
+        
+        // Build the multiline ICS calendar file content string
         const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Axis Mundi//Science Pub Talks//EN
@@ -140,6 +176,11 @@ END:VCALENDAR`;
     });
 }
 
+/**
+ * Toggles the visibility of talk abstracts between different languages (e.g., EN/CZ).
+ * @param {string} abstractId - The ID of the abstract container.
+ * @param {Event} event - The click event to determine the selected language.
+ */
 window.toggleAbstract = function (abstractId, event) {
     const abstractBox = document.getElementById(abstractId);
     const btns = abstractBox.querySelectorAll('.abstract-toggle-btn');
@@ -172,7 +213,8 @@ if (statusBox) {
     });
 }
 
-// Lightbox Logic
+/* --- Lightbox Logic --- */
+
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const lightboxCaption = document.getElementById('lightbox-caption');
@@ -183,6 +225,10 @@ const lightboxNext = document.querySelector('.lightbox-next');
 let currentIndex = 0;
 let lightboxItems = [];
 
+/**
+ * Updates the lightbox image and caption based on the currently selected index.
+ * Handles the fade transition effect when switching images.
+ */
 function updateLightbox() {
     const item = lightboxItems[currentIndex];
     if (!item) return;
@@ -197,6 +243,11 @@ function updateLightbox() {
     lightboxNext.style.display = hasMultiple ? 'block' : 'none';
 }
 
+/**
+ * Opens the lightbox and displays the image at the specified index.
+ * Locks body scrolling to prevent background scrolling while the lightbox is open.
+ * @param {number} index - The index of the image in the lightboxItems array.
+ */
 function openLightbox(index) {
     currentIndex = index;
     updateLightbox();
@@ -204,6 +255,9 @@ function openLightbox(index) {
     document.body.style.overflow = 'hidden';
 }
 
+/**
+ * Closes the lightbox and restores normal page scrolling.
+ */
 function closeLightbox() {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
@@ -219,6 +273,10 @@ function showPrev() {
     updateLightbox();
 }
 
+/**
+ * Scans the document for lightbox trigger elements, extracts their image URLs
+ * and captions, and attaches click listeners to open the lightbox.
+ */
 function initLightbox() {
     const triggers = document.querySelectorAll('.lightbox-trigger');
     lightboxItems = Array.from(triggers).map(trigger => ({
@@ -244,7 +302,8 @@ if (lightbox) {
     initLightbox();
 }
 
-// Gallery Logic
+/* --- Gallery Logic --- */
+
 const GALLERY_CONFIG = [
     { 
         date: "27-04-2026", 
@@ -259,6 +318,11 @@ const GALLERY_CONFIG = [
     }
 ];
 
+/**
+ * Formats a DD-MM-YYYY date string into a more readable format (e.g., Month DD, YYYY).
+ * @param {string} dateStr - Date string in DD-MM-YYYY format.
+ * @returns {string} The formatted date string.
+ */
 function formatDate(dateStr) {
     const parts = dateStr.split('-');
     if (parts.length !== 3) return dateStr;
@@ -267,6 +331,10 @@ function formatDate(dateStr) {
     return month ? `${month} ${parseInt(parts[0])}, ${parts[2]}` : dateStr;
 }
 
+/**
+ * Dynamically generates and renders the gallery DOM elements based on the GALLERY_CONFIG.
+ * Creates sections for each date, grid layouts for images, and expand/collapse toggles.
+ */
 function renderGallery() {
     const root = document.getElementById('gallery-root');
     if (!root) return;
@@ -344,7 +412,13 @@ function renderGallery() {
     initLightbox();
 }
 
-// Event Modal Logic
+/* --- Event Modal Logic --- */
+
+/**
+ * Initializes the "Past Events" interactive modal.
+ * Attaches click listeners to event boxes, populates modal content dynamically,
+ * and handles the embedding of PowerPoint presentation slides via Office Viewer.
+ */
 function initEventModal() {
     const eventModal = document.getElementById('event-modal');
     if (!eventModal) return;

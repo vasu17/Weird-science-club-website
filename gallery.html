@@ -17,8 +17,10 @@
 </head>
 
 <body>
+    <!-- === Background Canvas for Dynamic Star Animation === -->
     <canvas id="starsCanvas"></canvas>
 
+    <!-- === Main Site Navigation === -->
     <nav class="main-nav">
         <a href="index.html">Upcoming Events</a>
         <a href="past_events.html">Past Events</a>
@@ -26,9 +28,12 @@
         <a href="gallery.html" class="active">Gallery</a>
     </nav>
 
+    <!-- === Observatory Architecture (Gallery Container) === -->
     <div class="poster-container gallery-container">
         <div class="gallery-building">
+            <!-- === Observatory Dome Header === -->
             <div class="gallery-dome">
+                <!-- === Scanning Telescope SVG Animation === -->
                 <svg class="telescope-svg" viewBox="0 0 100 100" stroke-linejoin="round" fill="none">
                     <g class="scanning-telescope" style="transform-origin: 50px 85px;">
                         <!-- Layer 1: Opaque fills (establish solid background behind telescope) -->
@@ -70,6 +75,7 @@
                 </header>
             </div>
 
+            <!-- === Gallery Image Grid Body (Injected by JS) === -->
             <div class="gallery-body" id="gallery-root">
                 <!-- Gallery items will be injected here by index.js -->
             </div>
@@ -77,7 +83,7 @@
         </div>
     </div>
 
-    <!-- Lightbox Modal -->
+    <!-- === Image Lightbox Modal === -->
     <div id="lightbox" class="lightbox-modal">
         <div class="lightbox-close">&times;</div>
         <div class="lightbox-nav lightbox-prev"><span>&#10094;</span></div>

@@ -1,23 +1,46 @@
-/* ── Custom Scrollbar ─────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
-::-webkit-scrollbar-track { background: transparent; }
+/* --- Custom Scrollbars --- */
+/*
+  Replaces the default browser scrollbar with a custom, glowing gold theme.
+  Uses WebKit pseudo-elements for Chrome/Safari/Edge and standard properties for Firefox.
+*/
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    height: 0;
+    width: 0;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
     background: #d4af37;
     border-radius: 10px;
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.9), 0 0 18px rgba(212, 175, 55, 0.4);
     transition: background 0.3s ease, box-shadow 0.3s ease;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #f5e092;
     box-shadow: 0 0 12px rgba(245, 224, 146, 1), 0 0 28px rgba(245, 224, 146, 0.6);
 }
+
 /* Firefox */
-* { scrollbar-width: thin; scrollbar-color: #d4af37 transparent; }
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 transparent;
+}
+
 /* ────────────────────────────────────────────────── */
 
 
-
+/* --- Global Variables & Reset --- */
+/* Core theme colors and typography defined at root level for global consistency */
 :root {
     --bg-color: #0b101a;
     --gold-light: #f3d9a2;
@@ -34,11 +57,18 @@
 
 html {
     scroll-behavior: smooth;
-    background-color: #06080d; /* darkest gradient stop — prevents white flash */
-    overflow-y: overlay;       /* scrollbar overlays content at all zoom levels */
+    background-color: #06080d;
+    /* darkest gradient stop — prevents white flash */
+    overflow-y: overlay;
+    /* scrollbar overlays content at all zoom levels */
 }
 
+/* --- Base Layout & Typography --- */
 body {
+    /* 
+      15s infinite diagonal background gradient animation 
+      Provides a subtle, dynamic space-like depth across all pages
+    */
     background: linear-gradient(135deg, #0f1523 0%, #06080d 50%, #0b101a 100%);
     background-size: 200% 200%;
     animation: gradientShift 15s ease infinite;
@@ -49,7 +79,8 @@ body {
     align-items: center;
     min-height: 100vh;
     overflow-x: hidden;
-    overflow-y: overlay; /* scrollbar overlays content, no separate track panel */
+    overflow-y: overlay;
+    /* scrollbar overlays content, no separate track panel */
     position: relative;
     padding: 60px 20px;
 }
@@ -121,7 +152,14 @@ body {
     text-shadow: 0 0 10px rgba(243, 217, 162, 0.4);
 }
 
+/* --- Main Poster Architecture --- */
+
 .arch-frame {
+    /* 
+      The central architectural element that frames the main content.
+      Features a semi-transparent radial gradient for a spotlight effect
+      and inset shadows to create a sense of depth and 3D structure.
+    */
     width: 100%;
     height: 100%;
     min-height: 850px;
@@ -409,7 +447,12 @@ header {
     filter: drop-shadow(0 0 10px rgba(243, 217, 162, 0.2)) sepia(0.2) hue-rotate(-10deg) saturate(1.2);
 }
 
-/* Floating Icons outside arch */
+/* --- Floating Icons (Mathematical SVG Animations) --- */
+/* 
+  These rules handle the floating science icons scattered around the arch.
+  Each icon uses a different animation delay to create an organic, 
+  asynchronous floating effect rather than moving in unison.
+*/
 .floating-icons {
     position: absolute;
     top: 30px;
@@ -531,6 +574,7 @@ header {
     text-shadow: 0 0 8px var(--gold-light);
 }
 
+/* --- "Who We Are" Glowing Border Implementation --- */
 .who-we-are-box {
     position: relative;
     background: rgba(11, 16, 26, 0.4) !important;
@@ -538,6 +582,16 @@ header {
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6) !important;
 }
 
+/*
+  Complex Gradient & Masking Technique:
+  1. A background conic-gradient is applied to a slightly oversized pseudo-element (inset: -2px).
+  2. The gradient defines specific color stops to create 'bright spots' (glow).
+  3. The @property --glow-angle allows us to animate the gradient angle continuously.
+  4. Webkit masks are used to "cut out" the center, leaving only the 2px border visible.
+     - `linear-gradient(#fff 0 0) content-box` covers only the content area.
+     - `linear-gradient(#fff 0 0)` covers the whole element (including border).
+     - `mask-composite: exclude` (or xor) subtracts the content area from the total area, leaving just the border.
+*/
 .who-we-are-box::before {
     content: '';
     position: absolute;
@@ -1877,7 +1931,8 @@ header {
     padding: 20px 50px;
     overflow-y: overlay;
     min-height: 0;
-    overscroll-behavior: contain; /* prevent scroll chaining to background page */
+    overscroll-behavior: contain;
+    /* prevent scroll chaining to background page */
 }
 
 .modal-title {
@@ -1927,12 +1982,13 @@ header {
     width: 100%;
     /* Use the padding-bottom trick for a rock-solid 16:9 aspect ratio that handles zoom better */
     height: 0;
-    padding-bottom: 56.25%; 
+    padding-bottom: 56.25%;
     flex-shrink: 0;
     border-radius: 12px;
     background: #06080d;
     margin-top: 20px;
-    overflow: auto; /* Allow overflow/scrollability as requested */
+    overflow: auto;
+    /* Allow overflow/scrollability as requested */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
