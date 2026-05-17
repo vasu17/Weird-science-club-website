@@ -431,6 +431,7 @@ function initEventModal() {
     const modalSlidesContainer = document.getElementById('modal-slides-container');
     const slidesIframe = document.getElementById('slides-iframe');
     const viewSlidesBtn = document.getElementById('view-slides-btn');
+    const viewAbstractBtn = document.getElementById('view-abstract-btn');
     const downloadSlidesBtn = document.getElementById('modal-slides-download');
     const modalClose = document.getElementById('modal-close');
     const abstractToggle = document.getElementById('modal-abstract-toggle');
@@ -456,6 +457,7 @@ function initEventModal() {
             modalAbstractSection.style.display = 'block';
             modalSlidesContainer.style.display = 'none';
             slidesIframe.src = '';
+            if (viewAbstractBtn) viewAbstractBtn.style.display = 'none';
 
             if (slidesUrl && slidesUrl !== '#') {
                 viewSlidesBtn.style.display = 'inline-flex';
@@ -468,6 +470,7 @@ function initEventModal() {
                     modalAbstractSection.style.display = 'none';
                     modalSlidesContainer.style.display = 'block';
                     viewSlidesBtn.style.display = 'none';
+                    if (viewAbstractBtn) viewAbstractBtn.style.display = 'inline-flex';
                     
                     // Construct Office Viewer URL
                     let publicUrl;
@@ -503,14 +506,15 @@ function initEventModal() {
         });
     });
 
-    // Special behavior: clicking the abstract section can also reveal the slides button if not visible
-    if (modalAbstractSection) {
-        modalAbstractSection.addEventListener('click', () => {
-            if (viewSlidesBtn.style.display !== 'none') {
-                // If the user clicks the abstract, we can trigger the view slides action
-                viewSlidesBtn.click();
-            }
-        });
+    if (viewAbstractBtn) {
+        viewAbstractBtn.onclick = () => {
+            const container = eventModal.querySelector('.event-modal-container');
+            container.classList.remove('expanded');
+            modalAbstractSection.style.display = 'block';
+            modalSlidesContainer.style.display = 'none';
+            viewSlidesBtn.style.display = 'inline-flex';
+            viewAbstractBtn.style.display = 'none';
+        };
     }
 
     if (modalClose) {
