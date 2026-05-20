@@ -570,7 +570,7 @@ function initMailingList() {
             mailingListFormContainer.classList.toggle('active');
             if (mailingListFormContainer.classList.contains('active')) {
                 // Focus the email input once the expansion transition completes
-                const input = mailingListFormContainer.querySelector('.mailing-input-name');
+                const input = mailingListFormContainer.querySelector('.mailing-input-name') || mailingListFormContainer.querySelector('.emailoctopus-input');
                 if (input) {
                     setTimeout(() => input.focus(), 300);
                 }
