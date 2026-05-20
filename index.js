@@ -556,7 +556,59 @@ function initEventModal() {
     };
 }
 
+/**
+ * Initializes the "Join the Mailing List" expandable form and animation states.
+ */
+function initMailingList() {
+    const mailingListBtn = document.getElementById('mailingListBtn');
+    const mailingListFormContainer = document.getElementById('mailingListFormContainer');
+    const mailingListForm = document.getElementById('mailingListForm');
+    const mailingSuccessMsg = document.getElementById('mailingSuccessMsg');
+
+    if (mailingListBtn && mailingListFormContainer) {
+        mailingListBtn.addEventListener('click', () => {
+            mailingListFormContainer.classList.toggle('active');
+            if (mailingListFormContainer.classList.contains('active')) {
+                // Focus the email input once the expansion transition completes
+                const input = mailingListFormContainer.querySelector('.mailing-input-name');
+                if (input) {
+                    setTimeout(() => input.focus(), 300);
+                }
+            }
+        });
+    }
+
+    if (mailingListForm && mailingSuccessMsg) {
+        mailingListForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = mailingListForm.querySelector('.mailing-input-name');
+            const emailInput = mailingListForm.querySelector('.mailing-input-email');
+            const name = nameInput ? nameInput.value : '';
+            const email = emailInput ? emailInput.value : '';
+            console.log(`Subscribed: ${name} <${email}>`);
+
+            // Smoothly fade out the form elements
+            mailingListForm.style.transition = 'opacity 0.3s ease';
+            mailingListForm.style.opacity = '0';
+            
+            setTimeout(() => {
+                mailingListForm.style.display = 'none';
+                mailingSuccessMsg.style.display = 'block';
+                mailingSuccessMsg.style.opacity = '0';
+                
+                // Force layout reflow for animation trigger
+                mailingSuccessMsg.offsetHeight;
+                
+                // Fade in the success message
+                mailingSuccessMsg.style.transition = 'opacity 0.5s ease';
+                mailingSuccessMsg.style.opacity = '1';
+            }, 300);
+        });
+    }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     renderGallery();
     initEventModal();
+    initMailingList();
 });
