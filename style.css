@@ -2502,3 +2502,251 @@ header {
         padding: 12px 24px !important;
     }
 }
+
+/* ==========================================================================
+   Off-Season Announcement Card (Cosmic / Autumn Return)
+   ========================================================================== */
+
+.off-season-card {
+    position: relative;
+    width: 90%;
+    max-width: 440px;
+    margin: 40px auto;
+    border-radius: 20px;
+    background: rgba(6, 9, 19, 0.6); /* Transparent glassmorphic space background */
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 208, 102, 0.25);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.8), 
+        0 0 30px rgba(169, 132, 77, 0.1);
+    z-index: 2;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease, box-shadow 0.4s ease;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.off-season-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(255, 208, 102, 0.7);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.9), 
+        0 0 40px rgba(255, 208, 102, 0.35);
+}
+
+/* Shooting Stars Background Animation */
+.shooting-stars-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.shooting-star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ffd066;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 8px #ffd066, 
+        0 0 15px rgba(255, 208, 102, 0.6);
+    opacity: 0;
+}
+
+.shooting-star::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, #ffd066, transparent);
+    transform: translateY(-50%) rotate(-45deg);
+    transform-origin: left center;
+}
+
+.ss-1 {
+    top: -10px;
+    right: 20px;
+    animation: shootDiag 5s linear infinite;
+    animation-delay: 0s;
+}
+
+.ss-2 {
+    top: 20px;
+    right: -10px;
+    animation: shootDiag 6s linear infinite;
+    animation-delay: 2s;
+}
+
+.ss-3 {
+    top: -20px;
+    right: 150px;
+    animation: shootDiag 4s linear infinite;
+    animation-delay: 3.5s;
+}
+
+@keyframes shootDiag {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 0;
+    }
+    4% {
+        opacity: 1;
+        transform: translate(-10px, 10px) scale(1);
+    }
+    18% {
+        transform: translate(-150px, 150px) scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-150px, 150px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Content layout */
+.card-inner {
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Star Sparkles */
+.card-stars {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.star-sparkle {
+    font-size: 1.2rem;
+    color: #ffd066; /* High contrast gold */
+    animation: sparkle 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px #ffd066);
+}
+
+.star-sparkle:nth-child(2) {
+    animation-delay: 0.8s;
+    font-size: 1.6rem;
+    transform: translateY(-4px);
+}
+
+.star-sparkle:nth-child(3) {
+    animation-delay: 1.6s;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+}
+
+/* Badge */
+.season-badge {
+    background: rgba(255, 208, 102, 0.12);
+    border: 1px solid #ffd066; /* High contrast golden border */
+    color: #ffffff; /* Crisp white text */
+    font-family: var(--font-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    animation: badgeBreathe 3s ease-in-out infinite alternate;
+}
+
+@keyframes badgeBreathe {
+    0% { box-shadow: 0 0 5px rgba(255, 208, 102, 0.1); border-color: rgba(255, 208, 102, 0.4); }
+    100% { box-shadow: 0 0 15px rgba(255, 208, 102, 0.35); border-color: rgba(255, 208, 102, 1); }
+}
+
+/* Title */
+.season-title {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    line-height: 1.35;
+    margin-bottom: 18px;
+    color: #ffffff; /* Pure white for maximum primary contrast */
+    letter-spacing: 0.04em;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #ffffff 10%, #ffd066 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    filter: drop-shadow(0 0 8px rgba(255, 208, 102, 0.35));
+}
+
+/* Description */
+.season-desc {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #e6ecf5; /* Searing light silver-white text for pristine secondary contrast */
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+    margin-bottom: 28px;
+    max-width: 370px;
+    font-weight: 350;
+}
+
+/* Orbital Animation Decoration */
+.orbit-decoration {
+    position: relative;
+    width: 120px;
+    height: 20px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orbit-path {
+    position: absolute;
+    width: 100%;
+    height: 10px;
+    border: 1px dashed rgba(255, 208, 102, 0.45); /* High contrast orbit line */
+    border-radius: 50%;
+    transform: rotate(-6deg);
+}
+
+.orbit-center {
+    width: 8px;
+    height: 8px;
+    background: #ffd066; /* Glowing gold center star */
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ffd066, 0 0 15px rgba(255, 208, 102, 0.6);
+}
+
+.orbit-planet {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #ffffff; /* Searing white planet for ultimate contrast */
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ffffff, 0 0 20px rgba(255, 208, 102, 0.8);
+    animation: orbitClockwise 5s linear infinite;
+}
+
+@keyframes orbitClockwise {
+    0% {
+        transform: rotate(0deg) translate(60px) rotate(0deg);
+        z-index: 2;
+    }
+    50% {
+        transform: rotate(180deg) translate(60px) rotate(-180deg) scale(0.85);
+        z-index: 1;
+        opacity: 0.5;
+    }
+    100% {
+        transform: rotate(360deg) translate(60px) rotate(-360deg);
+        z-index: 2;
+    }
+}
