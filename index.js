@@ -1,111 +1,3 @@
-/* --- Setup & Canvas Initialization --- */
-const canvas = document.getElementById('starsCanvas');
-const ctx = canvas.getContext('2d');
-
-/**
- * Resizes the canvas to fill the entire window viewport.
- * Called initially and whenever the window is resized.
- */
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-/**
- * Aligns the floating science icons along the curved edge of the poster arch.
- * It uses the equation of a circle to calculate the horizontal shift required 
- * for an icon based on its vertical position relative to the arch's top radius.
- */
-function alignIconsToArch() {
-    // R is the radius of the top semicircular arch (300px based on border-radius).
-    const R = 300;
-    // Minimum gap in pixels between the icon and the arch border.
-    const GAP = 12;
-
-    ['left', 'right'].forEach(side => {
-        const col = document.querySelector(`.floating-icons.${side}`);
-        if (!col) return;
-        const containerRect = col.parentElement.getBoundingClientRect();
-
-        col.querySelectorAll('.icon').forEach(icon => {
-            const iconRect = icon.getBoundingClientRect();
-            // Calculate the Y coordinate of the icon's center relative to the arch container.
-            const iconCenterY = (iconRect.top + iconRect.height / 2) - containerRect.top;
-
-            // Calculate horizontal offset to follow the curve using Pythagoras: x = R - sqrt(R^2 - y^2)
-            // Only apply the offset if the icon falls within the top curved area (iconCenterY < R).
-            const archInset = iconCenterY < R
-                ? R - Math.sqrt(R * R - (R - iconCenterY) * (R - iconCenterY))
-                : 0;
-            const shift = archInset + GAP;
-            if (side === 'left') {
-                icon.style.marginLeft = `${shift}px`;
-                icon.style.marginRight = '';
-            } else {
-                icon.style.marginRight = `${shift}px`;
-                icon.style.marginLeft = '';
-            }
-        });
-    });
-}
-
-window.addEventListener('load', alignIconsToArch);
-window.addEventListener('resize', alignIconsToArch);
-setTimeout(alignIconsToArch, 100);
-
-/* --- Canvas Star Animation Logic --- */
-
-const stars = [];
-const numStars = 700;
-const maxR = 1500;
-
-// Initialize stars with random polar coordinates (radius and angle)
-// to simulate a rotating galaxy background scattered across the canvas.
-for (let i = 0; i < numStars; i++) {
-    const r = Math.sqrt(Math.random()) * maxR;
-    const t = Math.random() * Math.PI * 2;
-    stars.push({
-        x: r * Math.cos(t),
-        y: r * Math.sin(t),
-        radius: Math.random() * 1.5,
-        baseAlpha: Math.random(),
-        twinkleSpeed: 0.01 + Math.random() * 0.03,
-        angle: Math.random() * Math.PI * 2,
-        color: Math.random() > 0.3 ? '243, 217, 162' : '169, 132, 77'
-    });
-}
-
-let globalRotation = 0;
-
-/**
- * Main animation loop for the canvas. 
- * Clears the canvas, gently rotates the entire coordinate system to simulate
- * a slowly spinning night sky, and draws each star with a twinkling alpha effect.
- */
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    globalRotation -= 0.0008;
-    ctx.save();
-    ctx.translate(canvas.width / 2, -50);
-    ctx.rotate(globalRotation);
-    for (const star of stars) {
-        star.angle += star.twinkleSpeed;
-        const alpha = star.baseAlpha + Math.sin(star.angle) * 0.4;
-        const boundedAlpha = Math.max(0.05, Math.min(1, alpha));
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${star.color}, ${boundedAlpha})`;
-        ctx.fill();
-    }
-    ctx.restore();
-    requestAnimationFrame(animate);
-}
-
-animate();
-
 /* --- UI Interactions --- */
 
 /**
@@ -724,4 +616,388 @@ window.addEventListener('DOMContentLoaded', () => {
     renderPastEvents();
     initEventModal();
     initMailingList();
+    init3DRandomWalk();
 });
+
+/* --- 3D Lattice Random Walk Background --- */
+function init3DRandomWalk() {
+    const canvas = document.getElementById('starsCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    
+    // Set high-DPI resolution
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        ctx.scale(dpr, dpr);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Lattice & Step settings
+    const L = 25; // Lattice step distance (250 is exactly divisible by 25!)
+    const bounds = 250; // Cube bounds from -250 to 250 (500x500x500 space)
+    
+    // Smooth camera focus center
+    let cameraCenter = {x: 0, y: 0, z: 0};
+
+    // History array starting at center
+    let history = [{x: 0, y: 0, z: 0}];
+    
+    // Cardinal directions in 3D cubic lattice
+    const directions = [
+        {x: L, y: 0, z: 0}, {x: -L, y: 0, z: 0},
+        {x: 0, y: L, z: 0}, {x: 0, y: -L, z: 0},
+        {x: 0, y: 0, z: L}, {x: 0, y: 0, z: -L}
+    ];
+
+    // Helper to pick next valid random step (periodic boundary wrapping)
+    function getNextStep(current) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        
+        // Symmetrical Periodic Modulo Wrapping: maps 251 -> -250 and -251 -> 250
+        function wrap(val) {
+            const minVal = -250;
+            const maxVal = 250;
+            const range = maxVal - minVal + 1; // 501
+            let shifted = val - minVal;
+            shifted = ((shifted % range) + range) % range;
+            return shifted + minVal;
+        }
+
+        return {
+            x: wrap(current.x + dir.x),
+            y: wrap(current.y + dir.y),
+            z: wrap(current.z + dir.z)
+        };
+    }
+
+    // Precompute 5000 steps of the walk on startup
+    for (let i = 0; i < 5000; i++) {
+        const last = history[history.length - 1];
+        history.push(getNextStep(last));
+    }
+
+    // Transition variables for 5-second interval movement
+    let prevPos = history[history.length - 2];
+    let targetPos = history[history.length - 1];
+    let transitionStartTime = Date.now() - 5000; // start immediately in final position
+    let glowStartTime = Date.now() - 5000;
+    const transitionDuration = 1000; // 1 second glide
+    const stepInterval = 5000; // 5 seconds step cycle
+
+    // Schedule next steps every 5 seconds
+    setInterval(() => {
+        const last = history[history.length - 1];
+        const next = getNextStep(last);
+        
+        history.push(next);
+        if (history.length > 5001) {
+            history.shift(); // Keep history exactly at 5000 steps + active next step
+        }
+        
+        prevPos = history[history.length - 2];
+        targetPos = history[history.length - 1];
+        transitionStartTime = Date.now();
+        glowStartTime = Date.now();
+    }, stepInterval);
+
+    // 3D Perspective Projection centered around camera focus
+    function project(x, y, z, theta, phi) {
+        // Position relative to current camera center
+        const dx = x - cameraCenter.x;
+        const dy = y - cameraCenter.y;
+        const dz = z - cameraCenter.z;
+
+        // Rotate around Y-axis (yaw)
+        const x1 = dx * Math.cos(theta) - dz * Math.sin(theta);
+        const z1 = dx * Math.sin(theta) + dz * Math.cos(theta);
+
+        // Rotate around X-axis (pitch)
+        const y2 = dy * Math.cos(phi) - z1 * Math.sin(phi);
+        const z2 = dy * Math.sin(phi) + z1 * Math.cos(phi);
+
+        const F = 600; // Focal length
+        const D = 700; // Camera distance from center focus
+        const scale = F / (F + z2 + D);
+
+        const cx = canvas.width / (2 * (window.devicePixelRatio || 1));
+        const cy = canvas.height / (2 * (window.devicePixelRatio || 1));
+        
+        // Dynamically adjust size scale to perfectly fit mobile and desktop viewports
+        const wVal = window.innerWidth;
+        const hVal = window.innerHeight;
+        const aspect = wVal / hVal;
+        
+        let sizeScale = Math.min(wVal, hVal);
+        if (aspect > 1) {
+            // Dynamically scale up on wide screens based on the aspect ratio 
+            // so it covers more of the desktop width without being zoomed out.
+            sizeScale = hVal * (1 + (aspect - 1) * 0.5);
+        }
+        const projectedScale = scale * (sizeScale / 420);
+
+        return {
+            x: cx + x1 * projectedScale,
+            y: cy + y2 * projectedScale,
+            z: z2,
+            visible: (z2 + D > 0)
+        };
+    }
+
+    // Animation render loop
+    function draw() {
+        const w = canvas.width / (window.devicePixelRatio || 1);
+        const h = canvas.height / (window.devicePixelRatio || 1);
+        ctx.clearRect(0, 0, w, h);
+
+        const now = Date.now();
+
+        // 1. Determine active particle position (glide interpolation)
+        const tElapsed = now - transitionStartTime;
+        let activePos = targetPos;
+        
+        const dxStep = Math.abs(targetPos.x - prevPos.x);
+        const dyStep = Math.abs(targetPos.y - prevPos.y);
+        const dzStep = Math.abs(targetPos.z - prevPos.z);
+        const isWrappingStep = (dxStep > 2 * L || dyStep > 2 * L || dzStep > 2 * L);
+
+        if (tElapsed < transitionDuration) {
+            if (isWrappingStep) {
+                activePos = prevPos;
+            } else {
+                const u = tElapsed / transitionDuration;
+                const ease = 1 - Math.pow(1 - u, 3); // easeOutCubic
+                activePos = {
+                    x: prevPos.x + (targetPos.x - prevPos.x) * ease,
+                    y: prevPos.y + (targetPos.y - prevPos.y) * ease,
+                    z: prevPos.z + (targetPos.z - prevPos.z) * ease
+                };
+            }
+        }
+
+        // 2. Smoothly glide camera focus center to track the particle
+        cameraCenter.x += (activePos.x - cameraCenter.x) * 0.05;
+        cameraCenter.y += (activePos.y - cameraCenter.y) * 0.05;
+        cameraCenter.z += (activePos.z - cameraCenter.z) * 0.05;
+        
+        // Continuous majestic camera rotation
+        const theta = now * 0.00004; // yaw
+        const phi = Math.PI / 6 + Math.sin(now * 0.000015) * 0.04; // subtle pitch oscillation
+
+        // Grid colors - extremely dark version of gold/yellow accents
+        const gridColor = 'rgba(26, 19, 7, 0.4)'; // extremely dark version of gold/yellow
+        const axisColor = 'rgba(38, 28, 10, 0.5)'; // slightly more prominent but still very dark gold
+
+        // 1. Draw Subtle Reference Grid & Origin
+        // Ground plane (y=0) grid lines
+        ctx.save();
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 0.5;
+        
+        const gridIntervals = [-200, -100, 0, 100, 200];
+        // Lines parallel to X-axis on y=0
+        for (let gz of gridIntervals) {
+            const p1 = project(-bounds, 0, gz, theta, phi);
+            const p2 = project(bounds, 0, gz, theta, phi);
+            if (p1.visible && p2.visible) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+        // Lines parallel to Z-axis on y=0
+        for (let gx of gridIntervals) {
+            const p1 = project(gx, 0, -bounds, theta, phi);
+            const p2 = project(gx, 0, bounds, theta, phi);
+            if (p1.visible && p2.visible) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+
+        // Draw central X, Y, Z coordinate axis lines passing through the origin (0,0,0)
+        ctx.strokeStyle = axisColor;
+        ctx.lineWidth = 0.8;
+        
+        // X-axis (red/gold themed)
+        const xAxisStart = project(-bounds, 0, 0, theta, phi);
+        const xAxisEnd = project(bounds, 0, 0, theta, phi);
+        if (xAxisStart.visible && xAxisEnd.visible) {
+            ctx.beginPath();
+            ctx.moveTo(xAxisStart.x, xAxisStart.y);
+            ctx.lineTo(xAxisEnd.x, xAxisEnd.y);
+            ctx.stroke();
+        }
+        
+        // Y-axis (vertical)
+        const yAxisStart = project(0, -bounds, 0, theta, phi);
+        const yAxisEnd = project(0, bounds, 0, theta, phi);
+        if (yAxisStart.visible && yAxisEnd.visible) {
+            ctx.beginPath();
+            ctx.moveTo(yAxisStart.x, yAxisStart.y);
+            ctx.lineTo(yAxisEnd.x, yAxisEnd.y);
+            ctx.stroke();
+        }
+
+        // Z-axis (depth)
+        const zAxisStart = project(0, 0, -bounds, theta, phi);
+        const zAxisEnd = project(0, 0, bounds, theta, phi);
+        if (zAxisStart.visible && zAxisEnd.visible) {
+            ctx.beginPath();
+            ctx.moveTo(zAxisStart.x, zAxisStart.y);
+            ctx.lineTo(zAxisEnd.x, zAxisEnd.y);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // 2. Draw 3D Bounding Cube (very faint gold)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(169, 132, 77, 0.035)';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([4, 6]);
+        const corners = [
+            {x: -bounds, y: -bounds, z: -bounds},
+            {x: bounds, y: -bounds, z: -bounds},
+            {x: bounds, y: bounds, z: -bounds},
+            {x: -bounds, y: bounds, z: -bounds},
+            {x: -bounds, y: -bounds, z: bounds},
+            {x: bounds, y: -bounds, z: bounds},
+            {x: bounds, y: bounds, z: bounds},
+            {x: -bounds, y: bounds, z: bounds}
+        ];
+        
+        const projectedCorners = corners.map(c => project(c.x, c.y, c.z, theta, phi));
+        
+        // Draw bottom square
+        ctx.beginPath();
+        ctx.moveTo(projectedCorners[0].x, projectedCorners[0].y);
+        for(let i=1; i<4; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Draw top square
+        ctx.beginPath();
+        ctx.moveTo(projectedCorners[4].x, projectedCorners[4].y);
+        for(let i=5; i<8; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Draw vertical pillars
+        for(let i=0; i<4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(projectedCorners[i].x, projectedCorners[i].y);
+            ctx.lineTo(projectedCorners[i+4].x, projectedCorners[i+4].y);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // 3. Draw Walk Path
+        // We draw the segments from oldest to newest with a beautiful opacity & size gradient
+        ctx.save();
+        const pathLen = history.length;
+
+        // Draw older segments
+        for (let i = 0; i < pathLen - 2; i++) {
+            // Skip drawing segment if it wraps around the boundaries (jumps across screen)
+            const dx = Math.abs(history[i].x - history[i+1].x);
+            const dy = Math.abs(history[i].y - history[i+1].y);
+            const dz = Math.abs(history[i].z - history[i+1].z);
+            if (dx > 2 * L || dy > 2 * L || dz > 2 * L) continue;
+
+            const p1 = project(history[i].x, history[i].y, history[i].z, theta, phi);
+            const p2 = project(history[i+1].x, history[i+1].y, history[i+1].z, theta, phi);
+            
+            if (p1.visible && p2.visible) {
+                // Fade out the oldest steps exponentially to maintain atmospheric background depth
+                const progress = i / pathLen;
+                const opacity = 0.001 + Math.pow(progress, 4) * 0.35;
+                ctx.strokeStyle = `rgba(169, 132, 77, ${opacity})`;
+                ctx.lineWidth = 0.3 + Math.pow(progress, 4) * 1.5;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+
+        // 4. Draw Most Recent Segment with Transition Glow
+        const secLastPos = history[pathLen - 2];
+        const dxLast = Math.abs(secLastPos.x - activePos.x);
+        const dyLast = Math.abs(secLastPos.y - activePos.y);
+        const dzLast = Math.abs(secLastPos.z - activePos.z);
+
+        // Project active particle position (always needed for particle dot drawing below)
+        const pActiveParticle = project(activePos.x, activePos.y, activePos.z, theta, phi);
+
+        // Only draw connection line if the particle did not wrap around (jump)
+        if (dxLast <= 2 * L && dyLast <= 2 * L && dzLast <= 2 * L) {
+            const pSecLast = project(secLastPos.x, secLastPos.y, secLastPos.z, theta, phi);
+
+            if (pSecLast.visible && pActiveParticle.visible) {
+                const glowElapsed = now - glowStartTime;
+                const glowFactor = Math.max(0, 1 - glowElapsed / 3500); // decays to 0 over 3.5s
+                
+                // Draw baseline sharp line
+                ctx.strokeStyle = 'rgba(243, 217, 162, 0.7)';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(pSecLast.x, pSecLast.y);
+                ctx.lineTo(pActiveParticle.x, pActiveParticle.y);
+                ctx.stroke();
+
+                // Draw glowing overlay
+                if (glowFactor > 0) {
+                    ctx.save();
+                    ctx.shadowColor = '#f3d9a2';
+                    ctx.shadowBlur = 18 * glowFactor;
+                    ctx.strokeStyle = `rgba(243, 217, 162, ${0.3 + 0.6 * glowFactor})`;
+                    ctx.lineWidth = 1.8 + 2.5 * glowFactor;
+                    ctx.beginPath();
+                    ctx.moveTo(pSecLast.x, pSecLast.y);
+                    ctx.lineTo(pActiveParticle.x, pActiveParticle.y);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        }
+        ctx.restore();
+
+        // 5. Draw Glowing Particle
+        if (pActiveParticle.visible) {
+            const glowElapsed = now - glowStartTime;
+            const glowFactor = Math.max(0, 1 - glowElapsed / 3500);
+            
+            ctx.save();
+            const pulse = 1.5 * Math.sin(now / 180);
+            const radius = 6.5 + pulse + 4 * glowFactor;
+
+            // Soft glowing background circle
+            ctx.shadowColor = '#f3d9a2';
+            ctx.shadowBlur = 12 + 15 * glowFactor;
+            
+            // Draw radial gradient
+            const radGrad = ctx.createRadialGradient(pActiveParticle.x, pActiveParticle.y, 0, pActiveParticle.x, pActiveParticle.y, radius);
+            radGrad.addColorStop(0, '#ffffff');
+            radGrad.addColorStop(0.3, 'rgba(243, 217, 162, 0.9)');
+            radGrad.addColorStop(0.8, 'rgba(169, 132, 77, 0.45)');
+            radGrad.addColorStop(1, 'rgba(169, 132, 77, 0)');
+            
+            ctx.fillStyle = radGrad;
+            ctx.beginPath();
+            ctx.arc(pActiveParticle.x, pActiveParticle.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        requestAnimationFrame(draw);
+    }
+    
+    // Start drawing
+    requestAnimationFrame(draw);
+}

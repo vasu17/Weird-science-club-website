@@ -57,7 +57,7 @@
 
 html {
     scroll-behavior: smooth;
-    background-color: #06080d;
+    background: linear-gradient(to bottom, #0f1523 0%, #06080d 100%) no-repeat fixed;
     /* darkest gradient stop — prevents white flash */
     overflow-y: overlay;
     /* scrollbar overlays content at all zoom levels */
@@ -65,13 +65,7 @@ html {
 
 /* --- Base Layout & Typography --- */
 body {
-    /* 
-      15s infinite diagonal background gradient animation 
-      Provides a subtle, dynamic space-like depth across all pages
-    */
-    background: linear-gradient(135deg, #0f1523 0%, #06080d 50%, #0b101a 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 15s ease infinite;
+    background: transparent;
     color: var(--gold-light);
     font-family: var(--font-sans);
     display: flex;
@@ -85,28 +79,20 @@ body {
     padding: 60px 20px;
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+.floating-icons,
+.stars-crosses {
+    display: none !important;
 }
 
 #starsCanvas {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
     pointer-events: none;
+    display: block !important;
 }
 
 .poster-container {
@@ -151,8 +137,6 @@ body {
     border-bottom: 1px solid var(--gold-light);
     text-shadow: 0 0 10px rgba(243, 217, 162, 0.4);
 }
-
-/* --- Main Poster Architecture --- */
 
 .arch-frame {
     /* 
@@ -251,6 +235,16 @@ header {
     letter-spacing: 0.02em;
     text-shadow: 0 0 15px rgba(169, 132, 77, 0.4);
     animation: titleGlow 4s ease-in-out infinite alternate;
+    
+    /* Dynamic glassmorphic plaque exclusively behind the title text */
+    display: inline-block;
+    padding: 8px 32px;
+    background: rgba(6, 8, 13, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 20px;
+    border: 1px solid rgba(169, 132, 77, 0.12);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes titleGlow {
@@ -2749,4 +2743,470 @@ header {
         transform: rotate(360deg) translate(60px) rotate(-360deg);
         z-index: 2;
     }
-}
+}
+
+/* --- Background Explorer CTA Button --- */
+.background-explorer-cta {
+    display: inline-block;
+    margin: 0 auto;
+    z-index: 10;
+    position: relative;
+}
+
+.explorer-btn {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(169, 132, 77, 0.08);
+    border: 1px solid var(--gold-dark);
+    color: var(--gold-light);
+    padding: 12px 28px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 0 15px rgba(169, 132, 77, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.explorer-btn:hover {
+    background: rgba(169, 132, 77, 0.2);
+    border-color: var(--gold-light);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(243, 217, 162, 0.4), 0 0 8px rgba(243, 217, 162, 0.2);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.explorer-btn:hover .explorer-icon {
+    transform: translateX(4px);
+}
+
+.explorer-icon {
+    transition: transform 0.3s ease;
+}
+
+/* --- Simulation Page Specific Layouts --- */
+/* ========================================================
+   SIMULATOR PAGE — FULL-PAGE LAYOUT
+   ======================================================== */
+
+/* Body override on sim page only — allow full scroll, no top nav space */
+body.sim-page {
+    display: block;
+    overflow-y: auto;
+    padding-top: 0;
+}
+
+/* Full-viewport interactive canvas panel */
+.sim-fullpage-viewport {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    min-height: 500px;
+    background: transparent;
+    overflow: hidden;
+    cursor: grab;
+    display: flex;
+    align-items: stretch;
+}
+
+.sim-fullpage-viewport:active { cursor: grabbing; }
+
+.sim-fullpage-viewport canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Floating title overlay on canvas */
+.sim-canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px 48px 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.sim-canvas-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sim-canvas-label {
+    font-family: var(--font-serif);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+}
+
+.sim-canvas-heading {
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    text-shadow: 0 0 40px rgba(169, 132, 77, 0.5);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.sim-canvas-sub {
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--gold-dark);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* Scroll indicator pinned to bottom of canvas */
+.sim-scroll-down {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--gold-dark);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+    animation: bounceArrow 2.2s infinite ease-in-out;
+    transition: color 0.3s ease;
+    pointer-events: all;
+}
+.sim-scroll-down:hover { color: var(--gold-light); }
+
+.scroll-arrow-icon {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
+@keyframes bounceArrow {
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+    40%  { transform: translateX(-50%) translateY(-8px); }
+    60%  { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* ── Control deck below canvas ────────────────────────── */
+.sim-below-section {
+    width: 100%;
+    background: rgba(8, 11, 18, 0.92);
+    border-top: 1px solid rgba(169, 132, 77, 0.2);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 20;
+    position: relative;
+}
+
+.sim-control-panel {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 36px 48px;
+    align-items: flex-start;
+}
+
+/* Left cluster: main sliders */
+.sim-deck-cluster {
+    flex: 1;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Right cluster: weights table (wider) */
+.sim-deck-cluster--wide {
+    flex: 1.8;
+}
+
+.sim-deck-heading {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+    border-bottom: 1px solid rgba(169, 132, 77, 0.15);
+    padding-bottom: 8px;
+}
+
+/* Weights section header row (heading + coupling button side by side) */
+.sim-weights-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Coupling mode description line */
+.sim-coupling-desc {
+    font-size: 0.78rem;
+    color: var(--gold-dark);
+    margin: -8px 0 4px;
+    line-height: 1.4;
+}
+
+/* Coupling toggle button */
+.sim-coupling-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px 5px 10px;
+    border: 1px solid rgba(169, 132, 77, 0.45);
+    border-radius: 20px;
+    background: rgba(169, 132, 77, 0.08);
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.sim-coupling-btn:hover {
+    background: rgba(169, 132, 77, 0.2);
+    border-color: rgba(243, 217, 162, 0.7);
+    box-shadow: 0 0 10px rgba(243, 217, 162, 0.15);
+    color: #fff;
+}
+
+#couplingIcon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Reused from old layout — slider control group */
+.sim-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sim-control-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.sim-value-badge {
+    color: #fff;
+    background: rgba(169, 132, 77, 0.25);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid rgba(243, 217, 162, 0.3);
+    box-shadow: 0 0 8px rgba(243, 217, 162, 0.1);
+}
+
+/* Gold sliders */
+.sim-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    background: rgba(169, 132, 77, 0.15);
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid rgba(169, 132, 77, 0.22);
+}
+.sim-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--gold-light), 0 0 15px rgba(243, 217, 162, 0.5);
+    border: 1px solid #fff;
+    transition: transform 0.1s ease;
+}
+.sim-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.sim-slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    border: 1px solid #fff;
+}
+
+/* Weights table */
+.sim-weights-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(169, 132, 77, 0.03);
+    border: 1px solid rgba(169, 132, 77, 0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.sim-weight-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sim-weight-dir {
+    width: 80px;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
+
+.sim-weight-dir em {
+    display: block;
+    font-style: normal;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: rgba(169, 132, 77, 0.6);
+    text-transform: capitalize;
+}
+
+.sim-weight-slider-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.sim-weight-pct {
+    width: 52px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Small scroll hint before edu section */
+.sim-edu-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 0 8px;
+    color: var(--gold-dark);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: var(--font-sans);
+    position: relative;
+    z-index: 2;
+}
+
+/* Responsive Grid for Educational Cards */
+.sim-edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 60px;
+    padding: 0 48px;
+    z-index: 2;
+    position: relative;
+}
+
+/* ── Footer Navigation ───────────────────────────────── */
+.sim-footer-nav {
+    width: 100%;
+    border-top: 1px solid rgba(169, 132, 77, 0.15);
+    padding: 36px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: rgba(4, 6, 10, 0.7);
+    z-index: 10;
+    position: relative;
+}
+
+.sim-footer-nav nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.sim-footer-nav nav a {
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    text-decoration: none;
+    transition: color 0.25s ease;
+    padding: 2px 6px;
+}
+.sim-footer-nav nav a:hover { color: var(--gold-light); }
+
+.sim-footer-sep { color: rgba(169, 132, 77, 0.35); font-size: 0.9rem; }
+
+.sim-footer-credit {
+    font-size: 0.73rem;
+    color: rgba(169, 132, 77, 0.35);
+    letter-spacing: 0.08em;
+    font-family: var(--font-sans);
+    margin: 0;
+}
+
+/* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .sim-fullpage-viewport {
+        height: 60svh;
+        min-height: 340px;
+    }
+
+    .sim-canvas-overlay { padding: 24px 20px 0; }
+    .sim-canvas-heading { font-size: 1.4rem; }
+
+    .sim-control-panel {
+        flex-direction: column;
+        gap: 28px;
+        padding: 28px 20px;
+    }
+
+    .sim-deck-cluster--wide { flex: unset; }
+
+    .sim-edu-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 20px;
+    }
+
+    .sim-footer-nav { padding: 28px 20px; }
+}
