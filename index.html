@@ -142,6 +142,7 @@
 
 
             <!-- === Event Talks List (Upcoming Tab) === -->
+            <!--
             <div id="upcoming-talks" class="tab-content" style="display: block;">
                 <main class="talks-list" id="upcoming-talks">
                     <a href="#abstract-1" class="talk-link">
@@ -158,9 +159,56 @@
                     </a>
                 </main>
             </div>
+            -->
 
+            <!-- === Off-Season Announcement === -->
+            <div class="off-season-card">
+                <div class="shooting-stars-container">
+                    <div class="shooting-star ss-1"></div>
+                    <div class="shooting-star ss-2"></div>
+                    <div class="shooting-star ss-3"></div>
+                </div>
+                <div class="card-inner">
+                    <div class="card-stars">
+                        <span class="star-sparkle">✦</span>
+                        <span class="star-sparkle">✦</span>
+                        <span class="star-sparkle">✦</span>
+                    </div>
+                    <div class="season-badge">Summer Break</div>
+                    <h2 class="season-title">
+                        We will be back<br>
+                        <span class="gradient-text">in the Fall!</span>
+                    </h2>
+                    <p class="season-desc">
+                        We are enjoying our summer break and will work hard to bring you an extraordinary line-up of
+                        talks, cold drinks, and brilliant
+                        minds for our autumn return. We hope to see you all then!
+                    </p>
+                    <div class="orbit-decoration">
+                        <div class="orbit-path"></div>
+                        <div class="orbit-center"></div>
+                        <div class="orbit-planet"></div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- === Mailing List Subscription Section === -->
+            <div class="mailing-list-section">
+                <button class="mailing-list-btn" id="mailingListBtn">
+                    <span class="btn-text">Join the Mailing List</span>
+                    <svg class="mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                </button>
+                <div class="mailing-list-form-container" id="mailingListFormContainer">
+                    <script async src="https://eomail5.com/form/1ffabe46-548a-11f1-bafe-d9b77f2b3614.js"
+                        data-form="1ffabe46-548a-11f1-bafe-d9b77f2b3614"></script>
+                </div>
+            </div>
             <!-- === Event Metadata Footer (Date, Time, Location) === -->
+            <!--
             <div class="metadata">
                 <a href="#" class="meta-col left-align calendar-block-link" id="calendarDownload">
                     <span class="date-row">
@@ -188,7 +236,7 @@
                 target="_blank" rel="noopener noreferrer" class="signup-btn" id="signupButton">
                 Sign up!
             </a>
-
+        -->
             <div class="drinks-footer">
                 <svg class="drink-icon" style="left: 10%; bottom: 0px; --r: -10; --s: 0.9; animation-delay: 0s;"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
@@ -366,23 +414,10 @@
 
     </div>
 
-    <!-- === Mailing List Subscription Section === -->
-    <div class="mailing-list-section">
-        <button class="mailing-list-btn" id="mailingListBtn">
-            <span class="btn-text">Join the Mailing List</span>
-            <svg class="mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-            </svg>
-        </button>
-        <div class="mailing-list-form-container" id="mailingListFormContainer">
-            <script async src="https://eomail5.com/form/1ffabe46-548a-11f1-bafe-d9b77f2b3614.js"
-                data-form="1ffabe46-548a-11f1-bafe-d9b77f2b3614"></script>
-        </div>
-    </div>
+    <!--This is where the mailing list should be in fall-->
 
     <!-- === Event Description & Abstract Containers === -->
+    <!--
     <h2 class="abstract-main-heading">Abstracts</h2>
 
     <div class="event-description-box" id="abstract-1">
@@ -413,13 +448,12 @@
                         a visual journey into how astrophysicists use supercomputers to model the extreme environments
                         around black holes, including the giant black hole at the centre of our Galaxy. We cannot place
                         a black hole in a laboratory, but with equations, physics, and computation, we can watch how
-                        these cosmic engines feed, flicker, and shape their surroundings.
-                    </p>
+                        these cosmic engines feed, flicker, and shape their surroundings.</p>
                 </div>
             </div>
         </div>
     </div>
-
+-->
     <!-- === Image Lightbox Modal === -->
     <div id="lightbox" class="lightbox-modal">
         <div class="lightbox-close">&times;</div>
@@ -432,6 +466,7 @@
     </div>
 
     <script src="index.js"></script>
+
 </body>
 
 </html>
