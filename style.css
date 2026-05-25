@@ -2946,7 +2946,7 @@ body.sim-page {
         right: 40px;
         width: 380px;
         max-height: calc(100vh - 80px);
-        overflow-y: auto;
+        overflow: hidden; /* managed by panelBody now */
         background: rgba(8, 11, 18, 0.9);
         border: 1px solid rgba(169, 132, 77, 0.25) !important;
         border-radius: 16px;
@@ -2990,6 +2990,96 @@ body.sim-page {
     .sim-deck-cluster--wide {
         width: 100%;
     }
+
+    .sim-panel-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    .sim-panel-body.collapsed {
+        max-height: 0;
+    }
+    .sim-panel-body::-webkit-scrollbar { width: 4px; }
+    .sim-panel-body::-webkit-scrollbar-track { background: transparent; }
+    .sim-panel-body::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+}
+
+
+/* ── Panel header (collapsible toggle row) ────────────── */
+.sim-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(169, 132, 77, 0.15);
+    background: rgba(169, 132, 77, 0.04);
+    border-radius: 16px 16px 0 0;
+    transition: background 0.2s ease;
+}
+.sim-panel-header:hover {
+    background: rgba(169, 132, 77, 0.08);
+}
+
+.sim-panel-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sim-panel-drag-dots {
+    font-size: 1.1rem;
+    color: rgba(169, 132, 77, 0.45);
+    line-height: 1;
+}
+
+.sim-panel-title {
+    font-family: var(--font-serif);
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    text-transform: uppercase;
+}
+
+.sim-panel-collapse-btn {
+    background: none;
+    border: 1px solid rgba(169, 132, 77, 0.3);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gold-dark);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.sim-panel-collapse-btn:hover {
+    background: rgba(169, 132, 77, 0.15);
+    border-color: rgba(243, 217, 162, 0.6);
+    color: var(--gold-light);
+}
+
+.sim-collapse-chevron {
+    stroke-width: 2.5;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sim-collapse-chevron.collapsed {
+    transform: rotate(180deg);
+}
+
+/* ── Panel body (collapsible container) ─────────────── */
+.sim-panel-body {
+    overflow: hidden;
+    transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+    max-height: 1200px; /* large enough to fit all content */
+    opacity: 1;
+}
+.sim-panel-body.collapsed {
+    max-height: 0;
+    opacity: 0;
 }
 
 .sim-deck-heading {
@@ -3240,26 +3330,72 @@ body.sim-page {
 /* ── Mobile ─────────────────────────────────────────── */
 @media (max-width: 900px) {
     .sim-fullpage-viewport {
-        height: 60svh;
-        min-height: 340px;
+        height: 55svh;
+        min-height: 300px;
     }
 
-    .sim-canvas-overlay { padding: 24px 20px 0; }
-    .sim-canvas-heading { font-size: 1.4rem; }
+    .sim-canvas-overlay { padding: 20px 18px 0; }
+    .sim-canvas-heading { font-size: 1.3rem; }
+    .sim-canvas-sub { font-size: 0.73rem; }
+
+    /* Mobile: the control panel drops below the canvas,
+       but keep it compact with a collapsible header */
+    .sim-below-section {
+        border-radius: 0;
+        border-top: 1px solid rgba(169, 132, 77, 0.3) !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .sim-panel-header {
+        padding: 12px 16px 10px;
+        border-radius: 0;
+        /* Taller touch target */
+        min-height: 48px;
+    }
+
+    .sim-panel-body {
+        max-height: 55vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sim-panel-body.collapsed {
+        max-height: 0;
+    }
 
     .sim-control-panel {
         flex-direction: column;
-        gap: 28px;
-        padding: 28px 20px;
+        gap: 20px;
+        padding: 16px 16px 24px;
     }
 
     .sim-deck-cluster--wide { flex: unset; }
 
+    /* Larger touch targets for sliders on mobile */
+    .sim-slider {
+        height: 6px;
+        touch-action: pan-x;
+    }
+    .sim-slider::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+    }
+    .sim-slider::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Bigger weight row touch area */
+    .sim-weight-row {
+        min-height: 40px;
+    }
+
     .sim-edu-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-        padding: 0 20px;
+        padding: 0 16px;
     }
 
-    .sim-footer-nav { padding: 28px 20px; }
+    .sim-footer-nav { padding: 24px 16px; }
 }

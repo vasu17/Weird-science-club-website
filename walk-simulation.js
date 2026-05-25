@@ -11,6 +11,7 @@ function initInteractiveSimulator() {
     if (!canvas || !viewport) return;
 
     const ctx = canvas.getContext('2d');
+    let needsRedraw = true; // dirty flag
 
     // --- DOM references ---
     const historySlider = document.getElementById('historySlider');
@@ -21,6 +22,24 @@ function initInteractiveSimulator() {
     const couplingBtn   = document.getElementById('couplingBtn');
     const couplingLabel = document.getElementById('couplingLabel');
     const couplingDesc  = document.getElementById('couplingDesc');
+    const collapseBtn   = document.getElementById('collapseBtn');
+    const panelHeader   = document.getElementById('panelHeader');
+    const panelBody     = document.getElementById('panelBody');
+    const collapseChevron = document.getElementById('collapseChevron');
+
+    // ── Collapsible panel ──────────────────────────────────
+    let panelCollapsed = false;
+
+    function togglePanel() {
+        panelCollapsed = !panelCollapsed;
+        panelBody.classList.toggle('collapsed', panelCollapsed);
+        collapseChevron.classList.toggle('collapsed', panelCollapsed);
+        collapseBtn.setAttribute('aria-expanded', String(!panelCollapsed));
+    }
+
+    if (panelHeader)  panelHeader.addEventListener('click', togglePanel);
+    // Prevent double-firing when the button itself is clicked
+    if (collapseBtn)  collapseBtn.addEventListener('click', e => { e.stopPropagation(); togglePanel(); });
 
     const KEYS = ['PX', 'MX', 'PY', 'MY', 'PZ', 'MZ'];
     const weightSliders = {};
@@ -120,8 +139,8 @@ function initInteractiveSimulator() {
         MX: { x: -L, y:  0, z:  0 },
         PY: { x:  0, y: -L, z:  0 }, // screen −Y = world +Y (Up)
         MY: { x:  0, y:  L, z:  0 },
-        PZ: { x:  0, y:  0, z:  L },
-        MZ: { x:  0, y:  0, z: -L }
+        PZ: { x:  0, y:  0, z: -L },
+        MZ: { x:  0, y:  0, z:  L }
     };
 
     const maxSteps    = 10000;
@@ -158,17 +177,21 @@ function initInteractiveSimulator() {
 
     // ── Canvas sizing ──────────────────────────────────────
     let cachedSizeScale = 1; // recomputed on resize
+    let cachedDpr = 1;       // track device pixel ratio
 
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
+        cachedDpr = dpr;
         canvas.width  = viewport.clientWidth  * dpr;
         canvas.height = viewport.clientHeight * dpr;
+        // Setting canvas.width resets the transform, so safe to scale here
         ctx.scale(dpr, dpr);
 
         const vw = viewport.clientWidth;
         const vh = viewport.clientHeight;
         const aspect = vw / vh;
         cachedSizeScale = aspect > 1 ? vh * (1 + (aspect - 1) * 0.6) : Math.min(vw, vh);
+        needsRedraw = true;
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -243,7 +266,6 @@ function initInteractiveSimulator() {
     let glowStartTime       = Date.now() - 10000;
     const transitionDuration = 300; // ms
     let stepIntervalId = null;
-    let needsRedraw    = true; // dirty flag
 
     function startInterval() {
         if (stepIntervalId) clearInterval(stepIntervalId);
@@ -392,39 +414,54 @@ function initInteractiveSimulator() {
             }
         }
 
-        // ── Coordinate axes (more prominent) ─────────────
-        ctx.strokeStyle = 'rgba(100, 75, 30, 0.7)';
-        ctx.lineWidth   = 1.0;
-
-        const axisEndpoints = [
-            { neg: project(-bounds, 0, 0, tR, pR), pos: project(bounds, 0, 0, tR, pR), labelNeg: '−X', labelPos: '+X' },
-            { neg: project(0, bounds, 0, tR, pR),  pos: project(0, -bounds, 0, tR, pR), labelNeg: '−Y', labelPos: '+Y' },
-            { neg: project(0, 0, -bounds, tR, pR), pos: project(0, 0, bounds, tR, pR), labelNeg: '−Z', labelPos: '+Z' }
+        // ── Coordinate axes (vibrant distinct colours) ────────
+        // X = coral/red  · Y = lime green  · Z = cyan/blue
+        const AXIS_COLORS = [
+            { stroke: 'rgba(255, 90,  90,  0.9)', label: 'rgba(255,120,120,1)' }, // X — vivid coral red
+            { stroke: 'rgba( 80, 230, 100, 0.9)', label: 'rgba(100,240,120,1)' }, // Y — vivid lime green
+            { stroke: 'rgba( 60, 200, 255, 0.9)', label: 'rgba( 80,220,255,1)' }  // Z — vivid cyan
         ];
 
-        axisEndpoints.forEach(({ neg, pos }) => {
+        // Compute adaptive linewidth: thicker on high-DPR screens
+        const axisLW = Math.max(1.5, 2.0); // stays 2px logical regardless of DPR
+
+        const axisEndpoints = [
+            { neg: project(-bounds, 0, 0, tR, pR), pos: project(bounds, 0, 0, tR, pR), colorIdx: 0, labelNeg: '−X', labelPos: '+X' },
+            { neg: project(0, bounds, 0, tR, pR),  pos: project(0, -bounds, 0, tR, pR), colorIdx: 1, labelNeg: '−Y', labelPos: '+Y' },
+            { neg: project(0, 0, -bounds, tR, pR), pos: project(0, 0, bounds, tR, pR), colorIdx: 2, labelNeg: '+Z', labelPos: '−Z' }
+        ];
+
+        axisEndpoints.forEach(({ neg, pos, colorIdx }) => {
             if (neg.visible && pos.visible) {
+                ctx.strokeStyle = AXIS_COLORS[colorIdx].stroke;
+                ctx.lineWidth   = axisLW;
+                ctx.shadowColor = AXIS_COLORS[colorIdx].stroke;
+                ctx.shadowBlur  = 6;
                 ctx.beginPath(); ctx.moveTo(neg.x, neg.y); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+                ctx.shadowBlur  = 0;
             }
         });
 
         // ── Axis labels ───────────────────────────────────
-        ctx.font         = '600 11px "Outfit", sans-serif';
+        ctx.font         = `600 ${Math.max(11, 13 / dpr * dpr)}px "Outfit", sans-serif`;
         ctx.textBaseline = 'middle';
-        ctx.fillStyle    = 'rgba(169, 132, 77, 0.85)';
-        const labelOffset = bounds + 20;
+        const labelOffset = bounds + 22;
         const axisLabels = [
-            { pt: project( labelOffset, 0, 0, tR, pR), text: '+X' },
-            { pt: project(-labelOffset, 0, 0, tR, pR), text: '−X' },
-            { pt: project(0, -labelOffset, 0, tR, pR), text: '+Y' },
-            { pt: project(0,  labelOffset, 0, tR, pR), text: '−Y' },
-            { pt: project(0, 0,  labelOffset, tR, pR), text: '+Z' },
-            { pt: project(0, 0, -labelOffset, tR, pR), text: '−Z' }
+            { pt: project( labelOffset, 0, 0, tR, pR), text: '+X', colorIdx: 0 },
+            { pt: project(-labelOffset, 0, 0, tR, pR), text: '−X', colorIdx: 0 },
+            { pt: project(0, -labelOffset, 0, tR, pR), text: '+Y', colorIdx: 1 },
+            { pt: project(0,  labelOffset, 0, tR, pR), text: '−Y', colorIdx: 1 },
+            { pt: project(0, 0, -labelOffset, tR, pR), text: '+Z', colorIdx: 2 },
+            { pt: project(0, 0,  labelOffset, tR, pR), text: '−Z', colorIdx: 2 }
         ];
-        axisLabels.forEach(({ pt, text }) => {
+        axisLabels.forEach(({ pt, text, colorIdx }) => {
             if (pt.visible) {
+                ctx.fillStyle = AXIS_COLORS[colorIdx].label;
+                ctx.shadowColor = AXIS_COLORS[colorIdx].label;
+                ctx.shadowBlur  = 8;
                 ctx.textAlign = pt.x < w / 2 ? 'right' : 'left';
-                ctx.fillText(text, pt.x + (pt.x < w / 2 ? -6 : 6), pt.y);
+                ctx.fillText(text, pt.x + (pt.x < w / 2 ? -7 : 7), pt.y);
+                ctx.shadowBlur = 0;
             }
         });
         ctx.restore();
@@ -456,10 +493,13 @@ function initInteractiveSimulator() {
         }
         ctx.restore();
 
-        // ── Walk path (no shadow — cheaper GPU) ───────────
+        // ── Walk path (adaptive line width for mobile DPR) ────
         ctx.save();
         const pathLen = history.length;
         const startIdx = Math.max(0, pathLen - targetHistory - 1);
+        // Minimum line width scales with DPR so lines are crisp on mobile
+        const minLW = Math.max(0.5, 0.8 / dpr);
+        const maxLW = Math.max(1.2, 2.0 / dpr * dpr);
         for (let i = startIdx; i < pathLen - 2; i++) {
             const dx = Math.abs(history[i].x - history[i+1].x);
             const dy = Math.abs(history[i].y - history[i+1].y);
@@ -471,9 +511,9 @@ function initInteractiveSimulator() {
             if (p1.visible && p2.visible) {
                 // map progress strictly to the visible targetHistory window for smooth fading
                 const progress = (i - startIdx) / (pathLen - startIdx);
-                const alpha = 0.002 + Math.pow(progress, 3) * 0.38;
+                const alpha = 0.004 + Math.pow(progress, 2.5) * 0.42;
                 ctx.strokeStyle = `rgba(169, 132, 77, ${alpha})`;
-                ctx.lineWidth   = 0.3 + Math.pow(progress, 3) * 1.5;
+                ctx.lineWidth   = minLW + Math.pow(progress, 2.5) * (maxLW - minLW);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);

@@ -40,13 +40,26 @@
         </div>
     </div>
 
-    <!-- === Control Deck (below canvas) === -->
+    <!-- === Control Deck (below canvas / floating) === -->
     <div class="sim-below-section" id="controlSection">
+        <!-- Collapsible header / drag-handle -->
+        <div class="sim-panel-header" id="panelHeader">
+            <div class="sim-panel-header-left">
+                <span class="sim-panel-drag-dots">⠿</span>
+                <span class="sim-panel-title">Simulation Controls</span>
+            </div>
+            <button class="sim-panel-collapse-btn" id="collapseBtn" title="Collapse controls" aria-expanded="true" aria-controls="panelBody">
+                <svg class="sim-collapse-chevron" id="collapseChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
+                    <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sim-panel-body" id="panelBody">
         <div class="sim-control-panel">
 
             <!-- Left cluster: History + Speed sliders -->
             <div class="sim-deck-cluster">
-                <h3 class="sim-deck-heading">Simulation Controls</h3>
+                <h3 class="sim-deck-heading">Controls</h3>
 
                 <!-- Slider 1: History of Steps -->
                 <div class="sim-control-group">
@@ -115,14 +128,14 @@
                     </div>
                     <!-- +Z / -Z -->
                     <div class="sim-weight-row">
-                        <span class="sim-weight-dir">+Z <em>In</em></span>
+                        <span class="sim-weight-dir">+Z <em>Out</em></span>
                         <div class="sim-weight-slider-container">
                             <input type="range" id="weightPZ" class="sim-slider" min="0" max="100" value="16">
                         </div>
                         <span id="pctPZ" class="sim-weight-pct">16.7%</span>
                     </div>
                     <div class="sim-weight-row">
-                        <span class="sim-weight-dir">−Z <em>Out</em></span>
+                        <span class="sim-weight-dir">−Z <em>In</em></span>
                         <div class="sim-weight-slider-container">
                             <input type="range" id="weightMZ" class="sim-slider" min="0" max="100" value="16">
                         </div>
@@ -132,6 +145,7 @@
             </div>
 
         </div>
+        </div><!-- /.sim-panel-body -->
     </div>
 
     <!-- === Scroll Down Indicator to Education === -->
