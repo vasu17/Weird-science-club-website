@@ -2939,6 +2939,57 @@ body.sim-page {
     flex: 1.8;
 }
 
+/* Floating Control Panel for Desktop Viewports */
+@media (min-width: 901px) {
+    .sim-below-section {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        width: 380px;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        background: rgba(8, 11, 18, 0.9);
+        border: 1px solid rgba(169, 132, 77, 0.25) !important;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        z-index: 20;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        scrollbar-width: thin;
+        scrollbar-color: var(--gold-dark) transparent;
+    }
+
+    /* Custom Webkit scrollbar for the floating panel */
+    .sim-below-section::-webkit-scrollbar {
+        width: 6px;
+    }
+    .sim-below-section::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .sim-below-section::-webkit-scrollbar-thumb {
+        background: var(--gold-dark);
+        border-radius: 3px;
+    }
+    .sim-below-section::-webkit-scrollbar-thumb:hover {
+        background: var(--gold-light);
+    }
+
+    .sim-control-panel {
+        flex-direction: column;
+        gap: 28px;
+        padding: 24px;
+    }
+
+    .sim-deck-cluster {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .sim-deck-cluster--wide {
+        width: 100%;
+    }
+}
+
 .sim-deck-heading {
     font-family: var(--font-serif);
     font-size: 1.1rem;

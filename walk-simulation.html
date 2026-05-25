@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Random Walk Visualizer - Axis Mundi</title>
-    <meta name="description" content="Explore 3D lattice random walks interactively. Adjust directional probabilities, step history, and speed in real time.">
+    <meta name="description"
+        content="Explore 3D lattice random walks interactively. Adjust directional probabilities, step history, and speed in real time.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -32,9 +33,9 @@
 
         <!-- Scroll arrow at bottom of canvas -->
         <div class="sim-scroll-down" id="scrollArrow">
-            <span>Controls & Science below</span>
+            <span>Scroll for Science</span>
             <svg class="scroll-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
         </div>
     </div>
@@ -53,7 +54,8 @@
                         <span>Trace History (Steps)</span>
                         <span id="historyVal" class="sim-value-badge">5000</span>
                     </div>
-                    <input type="range" id="historySlider" class="sim-slider" min="100" max="10000" step="100" value="5000">
+                    <input type="range" id="historySlider" class="sim-slider" min="100" max="10000" step="100"
+                        value="5000">
                 </div>
 
                 <!-- Slider 2: Speed -->
@@ -62,7 +64,8 @@
                         <span>Step Frequency (Seconds)</span>
                         <span id="speedVal" class="sim-value-badge">0.5s</span>
                     </div>
-                    <input type="range" id="speedSlider" class="sim-slider" min="0.05" max="5.0" step="0.05" value="0.5">
+                    <input type="range" id="speedSlider" class="sim-slider" min="0.05" max="5.0" step="0.05"
+                        value="0.5">
                 </div>
             </div>
 
@@ -135,7 +138,7 @@
     <div class="sim-edu-scroll-hint" id="eduScrollHint">
         <span>Scroll for the Science</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20">
-            <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
         </svg>
     </div>
 
@@ -145,28 +148,36 @@
         <!-- Box 1: Short TL;DR Version -->
         <div class="event-description-box who-we-are-box" style="margin-top: 0; text-align: left;">
             <h3>The TL;DR on Random Walks</h3>
+            Will add explainations later
+            <!--
             <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
                 What happens when an object moves through space by taking successive steps in entirely random directions?
             </p>
             <p>
                 In a standard 3D lattice, a particle starts at the origin and chooses one of six directions (North, South, East, West, Up, or Down) with equal probability. While each step is completely independent and unpredictable, running this simulation thousands of times yields mathematically deterministic behaviors. The particle drifts away from its origin at a rate proportional to the square root of time — an emergent molecular order arising from pure thermal chaos!
             </p>
+            -->
         </div>
 
         <!-- Box 2: Monte Carlo -->
         <div class="event-description-box" style="margin-top: 0; text-align: left;">
             <h3>What is a Monte Carlo Simulation?</h3>
+            Will add explainations later
+            <!--
             <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
                 Solving the unsolvable by throwing random numbers at it.
             </p>
             <p>
                 A <strong>Monte Carlo simulation</strong> is a powerful computational algorithm that uses repeated random sampling to compute numerical results. When physical systems have too many moving parts (such as trillions of gas molecules colliding in a room) to solve directly with algebraic equations, scientists use random numbers instead. By simulating thousands of random walk paths, we can determine options pricing, simulate quantum physics, or calculate exact rates of heat dissipation and gas diffusion with high mathematical accuracy.
             </p>
+            -->
         </div>
 
         <!-- Box 3: History -->
         <div class="event-description-box" style="margin-top: 0; text-align: left;">
             <h3>The Solitaire Origins at Los Alamos</h3>
+            Will add explainations later
+            <!--
             <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
                 Pioneered by Ulam, von Neumann, and Metropolis under the Manhattan Project.
             </p>
@@ -176,11 +187,14 @@
             <p style="margin-top: 10px;">
                 He shared this random-sampling idea with <strong>John von Neumann</strong>, who saw its potential and wrote the code for the ENIAC supercomputer to solve secret neutron shielding calculations. The project was named <strong>"Monte Carlo"</strong> as a reference to Ulam's uncle, who borrowed money to play games of chance in Monaco's famous Monte Carlo Casino.
             </p>
+            -->
         </div>
 
         <!-- Box 4: Real Life -->
         <div class="event-description-box contact-box" style="margin-top: 0; text-align: left;">
             <h3>Where are they in Real Life?</h3>
+            Will add explainations later
+            <!--
             <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
                 You encounter the results of random walks every single day:
             </p>
@@ -190,6 +204,7 @@
                 <li>✦ <strong>Biology & Chemistry:</strong> Random walks are used to calculate the spatial configuration and folding pathways of long, complex DNA polymer strings.</li>
                 <li>✦ <strong>Wall Street Finance:</strong> The Black-Scholes model uses random walks (geometric Brownian motion) to model stock price fluctuations and value complex financial market options.</li>
             </ul>
+            -->
         </div>
     </div>
 

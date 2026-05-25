@@ -277,7 +277,7 @@ function initInteractiveSimulator() {
 
     if (scrollArrow) {
         scrollArrow.addEventListener('click', () => {
-            document.getElementById('controlSection')?.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('education-section')?.scrollIntoView({ behavior: 'smooth' });
         });
     }
 
