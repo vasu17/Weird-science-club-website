@@ -2180,7 +2180,9 @@ header {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    background: transparent;
+    background: rgba(11, 16, 26, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: none;
     cursor: pointer;
     padding: 12px 32px;
@@ -2224,6 +2226,7 @@ header {
 
 .mailing-list-btn:hover {
     color: #fff;
+    background: rgba(169, 132, 77, 0.12);
     transform: translateY(-3px) scale(1.03);
     box-shadow: 0 10px 25px rgba(243, 217, 162, 0.15);
 }

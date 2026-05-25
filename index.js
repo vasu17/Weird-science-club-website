@@ -778,14 +778,14 @@ function init3DRandomWalk() {
             }
         }
 
-        // 2. Smoothly glide camera focus center to track the particle
-        cameraCenter.x += (activePos.x - cameraCenter.x) * 0.05;
-        cameraCenter.y += (activePos.y - cameraCenter.y) * 0.05;
-        cameraCenter.z += (activePos.z - cameraCenter.z) * 0.05;
+        // 2. Camera remains fixed at the origin (0, 0, 0) so the orbit rotation is stable and centered around the Y-axis
+        cameraCenter.x = 0;
+        cameraCenter.y = 0;
+        cameraCenter.z = 0;
         
-        // Continuous majestic camera rotation
-        const theta = now * 0.00004; // yaw
-        const phi = Math.PI / 6 + Math.sin(now * 0.000015) * 0.04; // subtle pitch oscillation
+        // Continuous majestic camera rotation around Y-axis
+        const theta = now * 0.00004; // yaw (horizontal rotation)
+        const phi = Math.PI / 6;    // Y-axis locked at a constant 30 degree incline (pitch) towards the monitor
 
         // Grid colors - extremely dark version of gold/yellow accents
         const gridColor = 'rgba(26, 19, 7, 0.4)'; // extremely dark version of gold/yellow
@@ -821,39 +821,103 @@ function init3DRandomWalk() {
             }
         }
 
-        // Draw central X, Y, Z coordinate axis lines passing through the origin (0,0,0)
-        ctx.strokeStyle = axisColor;
-        ctx.lineWidth = 0.8;
-        
-        // X-axis (red/gold themed)
+        // Draw central X, Y, Z coordinate axis lines passing through the origin (0,0,0) in vibrant RGB
+        const axisLW = 1.2;
+
+        // X-axis (Red)
         const xAxisStart = project(-bounds, 0, 0, theta, phi);
         const xAxisEnd = project(bounds, 0, 0, theta, phi);
         if (xAxisStart.visible && xAxisEnd.visible) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 59, 48, 0.85)';
+            ctx.lineWidth = axisLW;
+            ctx.shadowColor = 'rgba(255, 59, 48, 0.6)';
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.moveTo(xAxisStart.x, xAxisStart.y);
             ctx.lineTo(xAxisEnd.x, xAxisEnd.y);
             ctx.stroke();
+            ctx.restore();
         }
         
-        // Y-axis (vertical)
+        // Y-axis (Green)
         const yAxisStart = project(0, -bounds, 0, theta, phi);
         const yAxisEnd = project(0, bounds, 0, theta, phi);
         if (yAxisStart.visible && yAxisEnd.visible) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(52, 199, 89, 0.85)';
+            ctx.lineWidth = axisLW;
+            ctx.shadowColor = 'rgba(52, 199, 89, 0.6)';
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.moveTo(yAxisStart.x, yAxisStart.y);
             ctx.lineTo(yAxisEnd.x, yAxisEnd.y);
             ctx.stroke();
+            ctx.restore();
         }
 
-        // Z-axis (depth)
+        // Z-axis (Blue)
         const zAxisStart = project(0, 0, -bounds, theta, phi);
         const zAxisEnd = project(0, 0, bounds, theta, phi);
         if (zAxisStart.visible && zAxisEnd.visible) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 122, 255, 0.85)';
+            ctx.lineWidth = axisLW;
+            ctx.shadowColor = 'rgba(0, 122, 255, 0.6)';
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.moveTo(zAxisStart.x, zAxisStart.y);
             ctx.lineTo(zAxisEnd.x, zAxisEnd.y);
             ctx.stroke();
+            ctx.restore();
         }
+
+        // Draw 3D axis labels (+X, +Y, -Y, +Z)
+        const labelOffset = bounds + 20;
+        ctx.save();
+        ctx.font = '600 12px "Outfit", sans-serif';
+        ctx.textBaseline = 'middle';
+        
+        // +X Label (Red)
+        const ptX = project(labelOffset, 0, 0, theta, phi);
+        if (ptX.visible) {
+            ctx.fillStyle = 'rgba(255, 100, 100, 1)';
+            ctx.shadowColor = 'rgba(255, 59, 48, 0.8)';
+            ctx.shadowBlur = 6;
+            ctx.textAlign = ptX.x < w / 2 ? 'right' : 'left';
+            ctx.fillText('+X', ptX.x + (ptX.x < w / 2 ? -7 : 7), ptX.y);
+        }
+
+        // +Y Label (Green)
+        const ptYPos = project(0, -labelOffset, 0, theta, phi);
+        if (ptYPos.visible) {
+            ctx.fillStyle = 'rgba(100, 240, 120, 1)';
+            ctx.shadowColor = 'rgba(52, 199, 89, 0.8)';
+            ctx.shadowBlur = 6;
+            ctx.textAlign = 'center';
+            ctx.fillText('+Y', ptYPos.x, ptYPos.y - 10);
+        }
+
+        // -Y Label (Green)
+        const ptYNeg = project(0, labelOffset, 0, theta, phi);
+        if (ptYNeg.visible) {
+            ctx.fillStyle = 'rgba(100, 240, 120, 1)';
+            ctx.shadowColor = 'rgba(52, 199, 89, 0.8)';
+            ctx.shadowBlur = 6;
+            ctx.textAlign = 'center';
+            ctx.fillText('−Y', ptYNeg.x, ptYNeg.y + 10);
+        }
+
+        // +Z Label (Blue)
+        const ptZ = project(0, 0, -labelOffset, theta, phi);
+        if (ptZ.visible) {
+            ctx.fillStyle = 'rgba(80, 190, 255, 1)';
+            ctx.shadowColor = 'rgba(0, 122, 255, 0.8)';
+            ctx.shadowBlur = 6;
+            ctx.textAlign = ptZ.x < w / 2 ? 'right' : 'left';
+            ctx.fillText('+Z', ptZ.x + (ptZ.x < w / 2 ? -7 : 7), ptZ.y);
+        }
+        ctx.restore();
         ctx.restore();
 
         // 2. Draw 3D Bounding Cube (very faint gold)
