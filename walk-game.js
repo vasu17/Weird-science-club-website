@@ -98,8 +98,9 @@ function initPixelGame() {
     const REST = { x: 0.45, y: 0.60, z: 0.10 };
 
     let faceData = [];
+    let dieEdges = [];
     let resultFace = null;
-    let resultTargetQuat = new THREE.Quaternion();
+    let chaosQuat = new THREE.Quaternion();
     let startQuat = new THREE.Quaternion();
 
     // ── Initialise Three.js scene ─────────────────────────────────────────────
@@ -149,32 +150,64 @@ function initPixelGame() {
         });
 
         tetraMesh = new THREE.Mesh(geo, mat);
-        tetraMesh.rotation.set(REST.x, REST.y, REST.z);
         threeScene.add(tetraMesh);
 
         // N / S / E / W labels and edges per face
         attachFaces(geo);
+
+        // Set initial rotation to the first corner's target quaternion (North) so it looks beautiful on load
+        if (faceData && faceData.length > 0) {
+            tetraMesh.quaternion.copy(faceData[0].targetQuat);
+        }
 
         // Kick off Three.js render loop
         dieLastTime = performance.now() * 0.001;
         requestAnimationFrame(dieTick);
     }
 
-    // Attach planes with text and line loops per face
+    // Attach planes with text to corners, and draw the 6 edges
     function attachFaces(geo) {
         faceData = [];
+        dieEdges = [];
         const pos = geo.getAttribute('position');
 
-        for (let face = 0; face < 4; face++) {
-            const i = face * 3;
-            const v1 = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
-            const v2 = new THREE.Vector3(pos.getX(i + 1), pos.getY(i + 1), pos.getZ(i + 1));
-            const v3 = new THREE.Vector3(pos.getX(i + 2), pos.getY(i + 2), pos.getZ(i + 2));
+        // 1. Extract 4 unique vertices (corners)
+        const vertices = [];
+        for (let i = 0; i < pos.count; i++) {
+            const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
+            let dup = false;
+            for (let uv of vertices) {
+                if (uv.distanceTo(v) < 0.01) { dup = true; break; }
+            }
+            if (!dup) vertices.push(v);
+        }
 
-            const centroid = v1.clone().add(v2).add(v3).divideScalar(3);
-            const normal = centroid.clone().normalize();
+        // 2. Draw 6 edge lines of the tetrahedron
+        const edgePairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+        edgePairs.forEach(([idx1, idx2]) => {
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([vertices[idx1], vertices[idx2]]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xa98440 });
+            const line = new THREE.Line(lineGeo, lineMat);
+            tetraMesh.add(line);
+            dieEdges.push({ indices: [idx1, idx2], mat: lineMat });
+        });
 
-            // Text plane
+        // 3. Create the 4 corner text planes
+        for (let j = 0; j < 4; j++) {
+            const v = vertices[j];
+            const normal = v.clone().normalize();
+
+            // Find the other 3 vertices
+            const others = vertices.filter((_, idx) => idx !== j);
+            const vUp = others[0]; // Pick one as the "up" reference
+            
+            // Project vUp onto the plane perpendicular to the corner normal to find the upright local axis.
+            // We multiply by -1 so the base vertex points straight DOWN (world -Y) instead of UP,
+            // making the outer outline a downward-pointing triangle just like the North roll.
+            const upLocal = vUp.clone().projectOnPlane(normal).normalize().multiplyScalar(-1);
+            const rightLocal = upLocal.clone().cross(normal).normalize();
+
+            // Text plane canvas
             const cv = document.createElement('canvas');
             cv.width = cv.height = 128;
             const c = cv.getContext('2d');
@@ -185,42 +218,34 @@ function initPixelGame() {
             c.shadowColor = 'rgba(0,0,0,0.9)';
             c.shadowBlur = 10;
             c.fillStyle = '#f3d9a2';
-            c.fillText(CARDINALS[face], 64, 64);
+            c.fillText(CARDINALS[j], 64, 64);
 
             const tex = new THREE.CanvasTexture(cv);
             const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthTest: false, side: THREE.DoubleSide });
-            const planeGeo = new THREE.PlaneGeometry(0.8, 0.8);
+            const planeGeo = new THREE.PlaneGeometry(0.7, 0.7);
             const plane = new THREE.Mesh(planeGeo, mat);
 
-            const planePos = normal.clone().multiplyScalar(0.70);
+            // Position slightly pushed outward from the vertex corner
+            const planePos = v.clone().add(normal.clone().multiplyScalar(0.18));
             plane.position.copy(planePos);
-            // Up vector points to v1
-            plane.up.copy(v1).sub(centroid).normalize();
+            
+            // Align plane using the symmetric basis
+            plane.up.copy(upLocal);
             plane.lookAt(planePos.clone().add(normal));
             tetraMesh.add(plane);
 
-            // Edges for this face
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([v1, v2, v3, v1]);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0xa98440 });
-            const line = new THREE.Line(lineGeo, lineMat);
-            tetraMesh.add(line);
-
-            // Calculate target quaternion to face the camera
-            const m = new THREE.Matrix4().makeBasis(
-                plane.up.clone().cross(normal).normalize(),
-                plane.up,
-                normal
-            );
+            // Calculate target quaternion to make this corner point at the camera symmetrically
+            const m = new THREE.Matrix4().makeBasis(rightLocal, upLocal, normal);
             const q = new THREE.Quaternion().setFromRotationMatrix(m).invert();
-            // Add a slight tilt so it looks 3D when settled
+            
             const tilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.25);
             q.premultiply(tilt);
 
             faceData.push({
-                dir: CARDINALS[face],
+                dir: CARDINALS[j],
                 normal: normal,
                 plane: plane,
-                lineMat: lineMat,
+                lineMat: null,
                 targetQuat: q
             });
         }
@@ -250,11 +275,6 @@ function initPixelGame() {
             case 'rolling': {
                 const elapsed = now - dieAnimStart;
 
-                // Fast chaotic tumbling — varies speed with sin/cos noise
-                tetraMesh.rotation.x += dt * (11 + Math.sin(elapsed * 7.1) * 6);
-                tetraMesh.rotation.y += dt * (9 + Math.cos(elapsed * 5.3) * 7);
-                tetraMesh.rotation.z += dt * (6 + Math.sin(elapsed * 9.9) * 4);
-
                 // Physics: integrate velocity (in pixels now)
                 dieOffX += dieVelX * dt;
                 dieOffY += dieVelY * dt;
@@ -267,7 +287,7 @@ function initPixelGame() {
                     dieVelX *= -0.7;
                     dieOffX = window.innerWidth - baseX - DIE_W;
                 }
-
+                
                 if (baseY + dieOffY < 0) {
                     dieVelY *= -0.7;
                     dieOffY = -baseY;
@@ -283,43 +303,38 @@ function initPixelGame() {
 
                 dieCanvas.style.transform = `translate(${dieOffX}px, ${dieOffY}px)`;
 
-                // After 0.90 s of rolling, begin to settle
-                if (elapsed > 0.90) {
+                // Tumble rotation: integrate chaotic spin into chaosQuat
+                const spinX = dt * (11 + Math.sin(elapsed * 7.1) * 6);
+                const spinY = dt * (9 + Math.cos(elapsed * 5.3) * 7);
+                const spinZ = dt * (6 + Math.sin(elapsed * 9.9) * 4);
+                const stepQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(spinX, spinY, spinZ));
+                chaosQuat.multiply(stepQuat);
+
+                // Blend from chaosQuat to resultFace.targetQuat smoothly
+                // Rolling starts fully chaotic (0.0 to 0.4s), then blends (0.4s to 1.0s)
+                if (elapsed < 0.4) {
+                    tetraMesh.quaternion.copy(chaosQuat);
+                } else {
+                    const t = Math.min((elapsed - 0.4) / 0.6, 1);
+                    const ease = t * t * (3 - 2 * t); // smoothstep
+                    tetraMesh.quaternion.slerpQuaternions(chaosQuat, resultFace.targetQuat, ease);
+                }
+
+                // After 1.0 s of rolling, begin to settle
+                if (elapsed > 1.00) {
                     dieState = 'settling';
                     dieAnimStart = now;
-                    startQuat.copy(tetraMesh.quaternion);
 
-                    // Pick the result naturally based on physics!
-                    // Find the face whose normal is pointing most directly at the camera (+Z axis)
-                    let maxZ = -Infinity;
-                    const tempNormal = new THREE.Vector3();
-                    faceData.forEach(f => {
-                        tempNormal.copy(f.normal).applyQuaternion(tetraMesh.quaternion);
-                        if (tempNormal.z > maxZ) {
-                            maxZ = tempNormal.z;
-                            resultFace = f;
-                        }
-                    });
-
-                    // Calculate the minimal rotation required to tilt this face exactly towards the camera,
-                    // without forcing a twist around the Z-axis (which would look artificial).
-                    tempNormal.copy(resultFace.normal).applyQuaternion(tetraMesh.quaternion);
-                    const toCamera = new THREE.Quaternion().setFromUnitVectors(
-                        tempNormal,
-                        new THREE.Vector3(0, 0, 1)
-                    );
-                    
-                    resultTargetQuat.copy(toCamera).multiply(tetraMesh.quaternion);
-                    
-                    // Add a slight tilt so it looks 3D when settled
-                    const tilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.25);
-                    resultTargetQuat.premultiply(tilt);
-
-                    // Highlight the chosen face
+                    // Highlight the chosen corner plane and its connected edges
                     faceData.forEach(f => {
                         const isWin = (f === resultFace);
-                        f.lineMat.color.setHex(isWin ? 0xffea99 : 0x554422);
-                        f.plane.material.color.setHex(isWin ? 0xffffff : 0xaaaaaa);
+                        f.plane.material.color.setHex(isWin ? 0xffffff : 0x554433);
+                    });
+
+                    const winIdx = CARDINALS.indexOf(resultFace.dir);
+                    dieEdges.forEach(e => {
+                        const isConnected = e.indices.includes(winIdx);
+                        e.mat.color.setHex(isConnected ? 0xffea99 : 0x332211);
                     });
                 }
                 break;
@@ -328,11 +343,10 @@ function initPixelGame() {
             // ── Settling: rotate to face camera while staying where it landed ──
             case 'settling': {
                 const elapsed = now - dieAnimStart;
-                const t = Math.min(elapsed / 1.05, 1); // 0.55s to settle
-                const easeOut = 1 - Math.pow(1 - t, 3); // cubic ease out
+                const t = Math.min(elapsed / 0.25, 1); // very quick 0.25s stop
 
-                // Rotate to smoothly face the camera using the natural settling angle
-                tetraMesh.quaternion.slerpQuaternions(startQuat, resultTargetQuat, easeOut);
+                // Ensure it is perfectly aligned at the target
+                tetraMesh.quaternion.copy(resultFace.targetQuat);
 
                 if (t >= 1) {
                     // ── Result is decided here ────────────────────────────────
@@ -343,7 +357,7 @@ function initPixelGame() {
                     stepCharacter(resultFace.dir);
 
                     dieState = 'paused';
-                    pauseUntil = now + 0.9; // rest where it landed for ~1.8s
+                    pauseUntil = now + 1.8; // rest where it landed for ~1.8s
                 }
                 break;
             }
@@ -404,11 +418,17 @@ function initPixelGame() {
         dieState = 'rolling';
         dieAnimStart = performance.now() * 0.001;
 
-        // Reset face colors
+        // Reset face and edge colors
         faceData.forEach(f => {
-            f.lineMat.color.setHex(0xa98440);
             f.plane.material.color.setHex(0xffffff);
         });
+        dieEdges.forEach(e => {
+            e.mat.color.setHex(0xa98440);
+        });
+
+        // Pre-select the result face uniformly at random to ensure true randomness
+        resultFace = faceData[Math.floor(Math.random() * 4)];
+        chaosQuat.copy(tetraMesh.quaternion);
 
         resultText.textContent = 'Rolling…';
         initAudio();
