@@ -79,8 +79,8 @@ body {
     padding: 60px 20px;
 }
 
-.floating-icons,
-.stars-crosses {
+.sim-page .floating-icons,
+.sim-page .stars-crosses {
     display: none !important;
 }
 
