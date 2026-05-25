@@ -28,7 +28,7 @@ function initInteractiveSimulator() {
     const collapseChevron = document.getElementById('collapseChevron');
 
     // ── Collapsible panel ──────────────────────────────────
-    let panelCollapsed = false;
+    let panelCollapsed = true;
 
     function togglePanel() {
         panelCollapsed = !panelCollapsed;

@@ -48,103 +48,105 @@
                 <span class="sim-panel-drag-dots">⠿</span>
                 <span class="sim-panel-title">Simulation Controls</span>
             </div>
-            <button class="sim-panel-collapse-btn" id="collapseBtn" title="Collapse controls" aria-expanded="true" aria-controls="panelBody">
-                <svg class="sim-collapse-chevron" id="collapseChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
-                    <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            <button class="sim-panel-collapse-btn" id="collapseBtn" title="Expand controls" aria-expanded="false"
+                aria-controls="panelBody">
+                <svg class="sim-collapse-chevron collapsed" id="collapseChevron" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" width="16" height="16">
+                    <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </button>
         </div>
-        <div class="sim-panel-body" id="panelBody">
-        <div class="sim-control-panel">
+        <div class="sim-panel-body collapsed" id="panelBody">
+            <div class="sim-control-panel">
 
-            <!-- Left cluster: History + Speed sliders -->
-            <div class="sim-deck-cluster">
-                <h3 class="sim-deck-heading">Controls</h3>
+                <!-- Left cluster: History + Speed sliders -->
+                <div class="sim-deck-cluster">
+                    <h3 class="sim-deck-heading">Controls</h3>
 
-                <!-- Slider 1: History of Steps -->
-                <div class="sim-control-group">
-                    <div class="sim-control-label">
-                        <span>Trace History (Steps)</span>
-                        <span id="historyVal" class="sim-value-badge">5000</span>
+                    <!-- Slider 1: History of Steps -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Trace History (Steps)</span>
+                            <span id="historyVal" class="sim-value-badge">5000</span>
+                        </div>
+                        <input type="range" id="historySlider" class="sim-slider" min="100" max="10000" step="100"
+                            value="5000">
                     </div>
-                    <input type="range" id="historySlider" class="sim-slider" min="100" max="10000" step="100"
-                        value="5000">
+
+                    <!-- Slider 2: Speed -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Step Frequency (Seconds)</span>
+                            <span id="speedVal" class="sim-value-badge">0.5s</span>
+                        </div>
+                        <input type="range" id="speedSlider" class="sim-slider" min="0.05" max="5.0" step="0.05"
+                            value="0.5">
+                    </div>
                 </div>
 
-                <!-- Slider 2: Speed -->
-                <div class="sim-control-group">
-                    <div class="sim-control-label">
-                        <span>Step Frequency (Seconds)</span>
-                        <span id="speedVal" class="sim-value-badge">0.5s</span>
+                <!-- Right cluster: Directional probability weights -->
+                <div class="sim-deck-cluster sim-deck-cluster--wide">
+                    <div class="sim-weights-header">
+                        <h3 class="sim-deck-heading">Directional Probability</h3>
+                        <!-- Coupling mode toggle -->
+                        <button id="couplingBtn" class="sim-coupling-btn" title="Toggle coupling mode">
+                            <span id="couplingIcon">⇄</span>
+                            <span id="couplingLabel">Fix Axis Pair</span>
+                        </button>
                     </div>
-                    <input type="range" id="speedSlider" class="sim-slider" min="0.05" max="5.0" step="0.05"
-                        value="0.5">
+                    <p class="sim-coupling-desc" id="couplingDesc">
+                        Moving one slider adjusts its axis partner (e.g. +X↔−X). Total always sums to 100%.
+                    </p>
+                    <div class="sim-weights-table">
+                        <!-- +X / -X -->
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">+X <em>East</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightPX" class="sim-slider" min="0" max="100" value="17">
+                            </div>
+                            <span id="pctPX" class="sim-weight-pct">16.7%</span>
+                        </div>
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">−X <em>West</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightMX" class="sim-slider" min="0" max="100" value="17">
+                            </div>
+                            <span id="pctMX" class="sim-weight-pct">16.7%</span>
+                        </div>
+                        <!-- +Y / -Y -->
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">+Y <em>Up</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightPY" class="sim-slider" min="0" max="100" value="17">
+                            </div>
+                            <span id="pctPY" class="sim-weight-pct">16.7%</span>
+                        </div>
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">−Y <em>Down</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightMY" class="sim-slider" min="0" max="100" value="17">
+                            </div>
+                            <span id="pctMY" class="sim-weight-pct">16.7%</span>
+                        </div>
+                        <!-- +Z / -Z -->
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">+Z <em>Out</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightPZ" class="sim-slider" min="0" max="100" value="16">
+                            </div>
+                            <span id="pctPZ" class="sim-weight-pct">16.7%</span>
+                        </div>
+                        <div class="sim-weight-row">
+                            <span class="sim-weight-dir">−Z <em>In</em></span>
+                            <div class="sim-weight-slider-container">
+                                <input type="range" id="weightMZ" class="sim-slider" min="0" max="100" value="16">
+                            </div>
+                            <span id="pctMZ" class="sim-weight-pct">16.7%</span>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-
-            <!-- Right cluster: Directional probability weights -->
-            <div class="sim-deck-cluster sim-deck-cluster--wide">
-                <div class="sim-weights-header">
-                    <h3 class="sim-deck-heading">Directional Probability</h3>
-                    <!-- Coupling mode toggle -->
-                    <button id="couplingBtn" class="sim-coupling-btn" title="Toggle coupling mode">
-                        <span id="couplingIcon">⇄</span>
-                        <span id="couplingLabel">Fix Axis Pair</span>
-                    </button>
-                </div>
-                <p class="sim-coupling-desc" id="couplingDesc">
-                    Moving one slider adjusts its axis partner (e.g. +X↔−X). Total always sums to 100%.
-                </p>
-                <div class="sim-weights-table">
-                    <!-- +X / -X -->
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">+X <em>East</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightPX" class="sim-slider" min="0" max="100" value="17">
-                        </div>
-                        <span id="pctPX" class="sim-weight-pct">16.7%</span>
-                    </div>
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">−X <em>West</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightMX" class="sim-slider" min="0" max="100" value="17">
-                        </div>
-                        <span id="pctMX" class="sim-weight-pct">16.7%</span>
-                    </div>
-                    <!-- +Y / -Y -->
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">+Y <em>Up</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightPY" class="sim-slider" min="0" max="100" value="17">
-                        </div>
-                        <span id="pctPY" class="sim-weight-pct">16.7%</span>
-                    </div>
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">−Y <em>Down</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightMY" class="sim-slider" min="0" max="100" value="17">
-                        </div>
-                        <span id="pctMY" class="sim-weight-pct">16.7%</span>
-                    </div>
-                    <!-- +Z / -Z -->
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">+Z <em>Out</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightPZ" class="sim-slider" min="0" max="100" value="16">
-                        </div>
-                        <span id="pctPZ" class="sim-weight-pct">16.7%</span>
-                    </div>
-                    <div class="sim-weight-row">
-                        <span class="sim-weight-dir">−Z <em>In</em></span>
-                        <div class="sim-weight-slider-container">
-                            <input type="range" id="weightMZ" class="sim-slider" min="0" max="100" value="16">
-                        </div>
-                        <span id="pctMZ" class="sim-weight-pct">16.7%</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
         </div><!-- /.sim-panel-body -->
     </div>
 
@@ -162,83 +164,225 @@
         <!-- Box 1: Short TL;DR Version -->
         <div class="event-description-box who-we-are-box" style="margin-top: 0; text-align: left;">
             <h3>The TL;DR on Random Walks</h3>
-            Will add explainations later
-            <!--
             <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
-                What happens when an object moves through space by taking successive steps in entirely random directions?
+                A random walk is what you get when motion is built from many unpredictable steps.
             </p>
             <p>
-                In a standard 3D lattice, a particle starts at the origin and chooses one of six directions (North, South, East, West, Up, or Down) with equal probability. While each step is completely independent and unpredictable, running this simulation thousands of times yields mathematically deterministic behaviors. The particle drifts away from its origin at a rate proportional to the square root of time — an emergent molecular order arising from pure thermal chaos!
-            </p>
-            -->
-        </div>
-
-        <!-- Box 2: Monte Carlo -->
-        <div class="event-description-box" style="margin-top: 0; text-align: left;">
-            <h3>What is a Monte Carlo Simulation?</h3>
-            Will add explainations later
-            <!--
-            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
-                Solving the unsolvable by throwing random numbers at it.
-            </p>
-            <p>
-                A <strong>Monte Carlo simulation</strong> is a powerful computational algorithm that uses repeated random sampling to compute numerical results. When physical systems have too many moving parts (such as trillions of gas molecules colliding in a room) to solve directly with algebraic equations, scientists use random numbers instead. By simulating thousands of random walk paths, we can determine options pricing, simulate quantum physics, or calculate exact rates of heat dissipation and gas diffusion with high mathematical accuracy.
-            </p>
-            -->
-        </div>
-
-        <!-- Box 3: History -->
-        <div class="event-description-box" style="margin-top: 0; text-align: left;">
-            <h3>The Solitaire Origins at Los Alamos</h3>
-            Will add explainations later
-            <!--
-            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
-                Pioneered by Ulam, von Neumann, and Metropolis under the Manhattan Project.
-            </p>
-            <p>
-                In 1946, mathematician <strong>Stanislaw Ulam</strong> was recovering from a brain illness in Los Alamos. To pass the time, he played solitaire. He wondered: what are the chances of winning this specific card layout? Attempting to calculate the exact combinatorics was overwhelmingly tedious. He realized it was simpler to deal 100 game layouts, play them out, and count the wins.
+                Imagine standing in the middle of a park on a beautiful summer day, you have a four sided die with each
+                side
+                marked as East, West, North and South. You toss the die and whatever it lands on, you move one step in
+                that direction. Keep doing this again and again and that is the basic idea of a <strong>random
+                    walk</strong>. Each individual step is
+                impossible to predict in advance, but when you repeat the process many times, clear patterns begin to
+                appear.
             </p>
             <p style="margin-top: 10px;">
-                He shared this random-sampling idea with <strong>John von Neumann</strong>, who saw its potential and wrote the code for the ENIAC supercomputer to solve secret neutron shielding calculations. The project was named <strong>"Monte Carlo"</strong> as a reference to Ulam's uncle, who borrowed money to play games of chance in Monaco's famous Monte Carlo Casino.
+                This is what makes random walks so important in science: randomness at the small scale can still produce
+                reliable behaviour at the large scale. A single path looks messy, but thousands of paths reveal
+                averages, trends, and probabilities that can be studied methodically. Just like humans are
+                unpredictable as individuals but much more well behaved as groups!
             </p>
-            -->
+            <p style="margin-top: 10px;">
+                Random walks help scientists describe processes such as particles moving in fluids, molecules spreading
+                through the air, animals searching for food, and simplified models of fluctuating prices in finance.
+            </p>
         </div>
 
-        <!-- Box 4: Real Life -->
-        <div class="event-description-box contact-box" style="margin-top: 0; text-align: left;">
-            <h3>Where are they in Real Life?</h3>
-            Will add explainations later
-            <!--
-            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
-                You encounter the results of random walks every single day:
+        <!-- Box 1.5: 2D Pixelated Game Box -->
+        <div class="event-description-box who-we-are-box sim-game-box" style="margin-top: 0; text-align: left;">
+            <h3 class="sim-game-title" style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-light); margin-bottom: 10px; letter-spacing: 0.05em;">Try it Yourself: The 2D Park Walk</h3>
+            <p style="font-weight: 500; margin-bottom: 20px; color: var(--gold-light);">
+                Roll the die to guide the explorer through the park!
             </p>
-            <ul style="list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 10px;">
-                <li>✦ <strong>Brownian Motion:</strong> The chaotic dancing of pollen grains suspended in water. In 1905, Albert Einstein mathematically modeled this as a random walk, providing the first physical proof of the existence of atoms!</li>
-                <li>✦ <strong>Modern Video Games:</strong> "Path tracing" in modern ray-traced computer graphics simulates light photons taking random scattering walks through a virtual scene, generating photorealistic shadows and reflections.</li>
-                <li>✦ <strong>Biology & Chemistry:</strong> Random walks are used to calculate the spatial configuration and folding pathways of long, complex DNA polymer strings.</li>
-                <li>✦ <strong>Wall Street Finance:</strong> The Black-Scholes model uses random walks (geometric Brownian motion) to model stock price fluctuations and value complex financial market options.</li>
-            </ul>
-            -->
+
+            <div class="sim-game-layout">
+                <!-- Left: Big Canvas + HUD -->
+                <div class="sim-game-board-container">
+                    <canvas id="gameCanvas" width="400" height="400"></canvas>
+                    <div class="sim-game-hud">
+                        <div class="hud-item">
+                            <span class="hud-label">Steps:</span>
+                            <span id="gameSteps" class="hud-value">0</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Pos:</span>
+                            <span id="gamePos" class="hud-value">(0, 0)</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Distance:</span>
+                            <span id="gameDist" class="hud-value">0.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Cube Die + buttons -->
+                <div class="sim-game-die-right">
+                    <div class="game-die-3d-container">
+                        <!-- Three.js tetrahedron die -->
+                        <canvas id="dieCanvas" class="die-threejs-canvas"></canvas>
+                        <div id="rollResultText" class="roll-result-text">Ready</div>
+                    </div>
+                    <div class="game-action-buttons">
+                        <button id="rollBtn" class="sim-coupling-btn game-btn" title="Roll die">
+                            <span>🎲</span> Roll
+                        </button>
+                        <button id="autoWalkBtn" class="sim-coupling-btn game-btn" title="Toggle Auto-Walk mode">
+                            <span id="autoWalkIcon">▶</span> Auto
+                        </button>
+                        <button id="resetGameBtn" class="sim-coupling-btn game-btn" title="Reset explorer path">
+                            <span>⟲</span> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- Box 2: Real Life (Moved immediately below TL;DR) -->
+        <div class="event-description-box contact-box" style="margin-top: 0; text-align: left;">
+            <h3>Where Are They in Real Life?</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Random walks are not just theory — they appear all around us.
+            </p>
+            <ul class="sim-real-life-list">
+                <li>✦ <strong>Perfume or smoke spreading through a room:</strong> molecules move through countless tiny
+                    collisions, and random-walk models help describe how they spread out over time.</li>
+                <li>✦ <strong>Brownian motion:</strong> tiny grains suspended in a liquid jiggle around because they are
+                    constantly being bumped by surrounding molecules.</li>
+                <li>✦ <strong>Computer graphics and video games:</strong> modern rendering methods often simulate many
+                    random paths of light to create realistic shadows, reflections, and soft lighting.</li>
+                <li>✦ <strong>Biology and chemistry:</strong> random motion is used to model how particles, molecules,
+                    and other small objects move and mix inside fluids and cells.</li>
+                <li>✦ <strong>Finance:</strong> some standard mathematical models treat price changes as partly random,
+                    which is why random-walk ideas appear in risk analysis and options pricing.</li>
+            </ul>
+        </div>
+
+        <!-- Box 3: What is a Monte Carlo Simulation? -->
+        <div class="event-description-box" style="margin-top: 0; text-align: left;">
+            <h3>What is a Monte Carlo Simulation?</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                A technique where many random trials are performed on a computer to answer a difficult question.
+            </p>
+            <p>
+                This is a method where <strong>multiple random samples</strong> are used to make an estimation of an
+                answer. Rather than solving a difficult mathematical equation using some kind of algorithm, we use a
+                computer to run <strong>multiple iterations</strong> and analyze the outcome from them. We can then make
+                estimations about <strong>averages, risk, probability, and uncertainty</strong>.
+            </p>
+            <p style="margin-top: 10px;">
+                For instance, if one wants to know how far a particle travels after taking multiple random steps, one
+                can simply perform such a <strong>simulation</strong> multiple times and come up with an <strong>average
+                    value</strong>. This principle is used in many areas from <strong>science to art</strong>.
+            </p>
+            <p style="margin-top: 10px;">
+                Monte Carlo does not mean “random guessing,” but rather an <strong>organized use of randomness</strong>.
+            </p>
+        </div>
+
+        <!-- Box 4: History of Random Walks -->
+        <div class="event-description-box" style="margin-top: 0; text-align: left;">
+            <h3>Random Walks Through History</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Brownian motion, Monte Carlo estimation, and beyond.
+            </p>
+            <p>
+                The history of random walks can be traced back to the <strong>Brownian motion</strong> phenomenon
+                discovered by the botanist <strong>Robert Brown</strong> in 1827 when he observed tiny particles
+                floating randomly inside water. It was in 1905 that <strong>Albert Einstein</strong> demonstrated that
+                this movement could be analyzed statistically and interpreted in terms of collisions with invisible
+                particles.
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Stanislaw Ulam</strong>, the mathematician who introduced <strong>Monte Carlo methods</strong>,
+                understood that many probability questions were better tackled through estimation based on numerous
+                iterations. The idea became a cornerstone of computational research at Los Alamos and was further
+                developed jointly with such giants of the field as <strong>John von Neumann</strong>, <strong>Robert
+                    Richtmyer</strong>, and <strong>Nicholas Metropolis</strong>.
+            </p>
+            <p style="margin-top: 10px;">
+                In modern science, computing, and engineering, any sufficiently complex or noisy system cannot be
+                handled directly; that is when <strong>Monte Carlo simulations</strong> come into play.
+            </p>
+        </div>
+
+        <!-- Box 5: Further Reading -->
+        <div class="event-description-box sim-reading-box" style="margin-top: 0; text-align: left;">
+            <h3>Further Reading</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                A few good places to go next — from short videos to readable articles.
+            </p>
+
+            <div class="sim-reading-sections">
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Videos</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.youtube.com/watch?v=stgYW6M5o4k" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> PBS: What is a Random Walk?
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=KZeIEiBrT_w" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Veritasium: Math of Randomness
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=ZNzoTGv_XiQ" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Steve Mould: Brownian Motion
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=-fCVxTTAtFQ" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Khan Academy: Monte Carlo
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=OgO1gpXSUzU" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> MIT OCW: Monte Carlo
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Articles</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.britannica.com/science/random-walk" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Britannica: Random Walk
+                        </a>
+                        <a href="https://www.britannica.com/science/Brownian-motion" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Britannica: Brownian Motion
+                        </a>
+                        <a href="https://www.ibm.com/think/topics/monte-carlo-simulation" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> IBM: Monte Carlo
+                        </a>
+                        <a href="https://www.lanl.gov/media/publications/actinide-research-quarterly/1123-hitting-the-jackpot-the-birth-of-the-monte-carlo-method"
+                            target="_blank" rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Los Alamos: Birth of Monte Carlo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- === End of Educational Grid === -->
 
     <!-- === Footer Navigation (replaces top nav on this page) === -->
     <footer class="sim-footer-nav">
         <nav>
             <a href="index.html">Upcoming Events</a>
-            <span class="sim-footer-sep">·</span>
+            <span class="sim-footer-sep">✦</span>
             <a href="past_events.html">Past Events</a>
-            <span class="sim-footer-sep">·</span>
+            <span class="sim-footer-sep">✦</span>
             <a href="team.html">Meet the Team</a>
-            <span class="sim-footer-sep">·</span>
+            <span class="sim-footer-sep">✦</span>
             <a href="gallery.html">Gallery</a>
         </nav>
-        <p class="sim-footer-credit">Axis Mundi Science Club · 3D Lattice Explorer</p>
+        <p class="sim-footer-credit">Axis Mundi Science Club &nbsp;✦&nbsp; 3D Lattice Explorer</p>
     </footer>
 
-    <!-- Scripts: index.js provides background canvas logic; walk-simulation.js drives the visualizer -->
+    <!-- Scripts: three.js CDN, index.js background, walk-simulation.js, walk-game.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="index.js"></script>
     <script src="walk-simulation.js"></script>
+    <script src="walk-game.js"></script>
 </body>
 
 </html>
