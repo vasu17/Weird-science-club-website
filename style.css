@@ -15,7 +15,7 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: #080b12;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -30,10 +30,12 @@
     box-shadow: 0 0 12px rgba(245, 224, 146, 1), 0 0 28px rgba(245, 224, 146, 0.6);
 }
 
-/* Firefox */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #d4af37 transparent;
+/* Firefox fallback */
+@supports (-moz-appearance: none) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #d4af37 #080b12;
+    }
 }
 
 /* ────────────────────────────────────────────────── */
@@ -59,8 +61,7 @@ html {
     scroll-behavior: smooth;
     background: linear-gradient(to bottom, #0f1523 0%, #06080d 100%) no-repeat fixed;
     /* darkest gradient stop — prevents white flash */
-    overflow-y: overlay;
-    /* scrollbar overlays content at all zoom levels */
+    overflow-y: auto;
 }
 
 /* --- Base Layout & Typography --- */
@@ -73,8 +74,6 @@ body {
     align-items: center;
     min-height: 100vh;
     overflow-x: hidden;
-    overflow-y: overlay;
-    /* scrollbar overlays content, no separate track panel */
     position: relative;
     padding: 60px 20px;
 }
@@ -1952,7 +1951,7 @@ header {
     flex-direction: column;
     gap: 15px;
     padding: 20px 50px;
-    overflow-y: overlay;
+    overflow-y: auto;
     min-height: 0;
     overscroll-behavior: contain;
     /* prevent scroll chaining to background page */
@@ -2955,8 +2954,11 @@ body.sim-page {
         z-index: 20;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        scrollbar-width: thin;
-        scrollbar-color: var(--gold-dark) transparent;
+        /* Firefox fallback */
+        @supports (-moz-appearance: none) {
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-dark) #080b12;
+        }
     }
 
     /* Custom Webkit scrollbar for the floating panel */
@@ -2964,7 +2966,7 @@ body.sim-page {
         width: 6px;
     }
     .sim-below-section::-webkit-scrollbar-track {
-        background: transparent;
+        background: #080b12;
     }
     .sim-below-section::-webkit-scrollbar-thumb {
         background: var(--gold-dark);
