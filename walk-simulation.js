@@ -124,6 +124,7 @@ function initInteractiveSimulator() {
         MZ: { x:  0, y:  0, z: -L }
     };
 
+    const maxSteps    = 10000;
     let targetHistory = parseInt(historySlider.value);
     let stepSpeed     = parseFloat(speedSlider.value) * 1000;
     let history       = [{ x: 0, y: 0, z: 0 }];
@@ -153,7 +154,7 @@ function initInteractiveSimulator() {
             history.push(getNextBiasedStep(history[history.length - 1]));
         }
     }
-    generateInitialWalk(targetHistory);
+    generateInitialWalk(maxSteps);
 
     // ── Canvas sizing ──────────────────────────────────────
     let cachedSizeScale = 1; // recomputed on resize
@@ -249,7 +250,7 @@ function initInteractiveSimulator() {
         stepIntervalId = setInterval(() => {
             const next = getNextBiasedStep(history[history.length - 1]);
             history.push(next);
-            while (history.length > targetHistory + 1) history.shift();
+            while (history.length > maxSteps + 1) history.shift();
 
             prevPos             = history[history.length - 2];
             targetPos           = history[history.length - 1];
@@ -264,14 +265,6 @@ function initInteractiveSimulator() {
     historySlider.addEventListener('input', e => {
         targetHistory = parseInt(e.target.value);
         historyVal.textContent = targetHistory;
-        if (history.length > targetHistory + 1) {
-            history = history.slice(history.length - targetHistory - 1);
-        } else {
-            const needed = targetHistory - history.length + 1;
-            for (let i = 0; i < needed; i++) {
-                history.push(getNextBiasedStep(history[history.length - 1]));
-            }
-        }
         needsRedraw = true;
     });
 
@@ -368,14 +361,10 @@ function initInteractiveSimulator() {
             }
         }
 
-        // Smooth camera tracking — mark as dirty while gliding
-        const camDx = activePos.x - cameraCenter.x;
-        const camDy = activePos.y - cameraCenter.y;
-        const camDz = activePos.z - cameraCenter.z;
-        if (Math.abs(camDx) + Math.abs(camDy) + Math.abs(camDz) > 0.5) needsRedraw = true;
-        cameraCenter.x += camDx * 0.08;
-        cameraCenter.y += camDy * 0.08;
-        cameraCenter.z += camDz * 0.08;
+        // Camera remains fixed at the origin (0, 0, 0) so the orbit rotation is stable and centered
+        cameraCenter.x = 0;
+        cameraCenter.y = 0;
+        cameraCenter.z = 0;
 
         // Keep dirty while dragging
         if (isDragging) needsRedraw = true;
@@ -470,7 +459,8 @@ function initInteractiveSimulator() {
         // ── Walk path (no shadow — cheaper GPU) ───────────
         ctx.save();
         const pathLen = history.length;
-        for (let i = 0; i < pathLen - 2; i++) {
+        const startIdx = Math.max(0, pathLen - targetHistory - 1);
+        for (let i = startIdx; i < pathLen - 2; i++) {
             const dx = Math.abs(history[i].x - history[i+1].x);
             const dy = Math.abs(history[i].y - history[i+1].y);
             const dz = Math.abs(history[i].z - history[i+1].z);
@@ -479,7 +469,8 @@ function initInteractiveSimulator() {
             const p1 = project(history[i].x,   history[i].y,   history[i].z,   tR, pR);
             const p2 = project(history[i+1].x, history[i+1].y, history[i+1].z, tR, pR);
             if (p1.visible && p2.visible) {
-                const progress = i / pathLen;
+                // map progress strictly to the visible targetHistory window for smooth fading
+                const progress = (i - startIdx) / (pathLen - startIdx);
                 const alpha = 0.002 + Math.pow(progress, 3) * 0.38;
                 ctx.strokeStyle = `rgba(169, 132, 77, ${alpha})`;
                 ctx.lineWidth   = 0.3 + Math.pow(progress, 3) * 1.5;
