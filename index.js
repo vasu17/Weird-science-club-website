@@ -296,7 +296,16 @@ const GALLERY_CONFIG = [
         date: "22-05-2026",
         folder: "assets/images/22-05-2026",
         images: [
-            ""
+            "_MG_1063.JPG",
+            "_MG_1064.JPG",
+            "_MG_1058.JPG",
+            "_MG_1060.JPG",
+            "_MG_1065.JPG",
+            "_MG_1066.JPG",
+            "_MG_1068.JPG",
+            "_MG_1069.JPG",
+            "_MG_1073.JPG",
+            "_MG_1075.JPG"
         ]
     },
     {
@@ -625,7 +634,7 @@ function init3DRandomWalk() {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    
+
     // Set high-DPI resolution
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
@@ -639,24 +648,24 @@ function init3DRandomWalk() {
     // Lattice & Step settings
     const L = 25; // Lattice step distance (250 is exactly divisible by 25!)
     const bounds = 250; // Cube bounds from -250 to 250 (500x500x500 space)
-    
+
     // Smooth camera focus center
-    let cameraCenter = {x: 0, y: 0, z: 0};
+    let cameraCenter = { x: 0, y: 0, z: 0 };
 
     // History array starting at center
-    let history = [{x: 0, y: 0, z: 0}];
-    
+    let history = [{ x: 0, y: 0, z: 0 }];
+
     // Cardinal directions in 3D cubic lattice
     const directions = [
-        {x: L, y: 0, z: 0}, {x: -L, y: 0, z: 0},
-        {x: 0, y: L, z: 0}, {x: 0, y: -L, z: 0},
-        {x: 0, y: 0, z: L}, {x: 0, y: 0, z: -L}
+        { x: L, y: 0, z: 0 }, { x: -L, y: 0, z: 0 },
+        { x: 0, y: L, z: 0 }, { x: 0, y: -L, z: 0 },
+        { x: 0, y: 0, z: L }, { x: 0, y: 0, z: -L }
     ];
 
     // Helper to pick next valid random step (periodic boundary wrapping)
     function getNextStep(current) {
         const dir = directions[Math.floor(Math.random() * directions.length)];
-        
+
         // Symmetrical Periodic Modulo Wrapping: maps 251 -> -250 and -251 -> 250
         function wrap(val) {
             const minVal = -250;
@@ -692,12 +701,12 @@ function init3DRandomWalk() {
     setInterval(() => {
         const last = history[history.length - 1];
         const next = getNextStep(last);
-        
+
         history.push(next);
         if (history.length > 5001) {
             history.shift(); // Keep history exactly at 5000 steps + active next step
         }
-        
+
         prevPos = history[history.length - 2];
         targetPos = history[history.length - 1];
         transitionStartTime = Date.now();
@@ -725,12 +734,12 @@ function init3DRandomWalk() {
 
         const cx = canvas.width / (2 * (window.devicePixelRatio || 1));
         const cy = canvas.height / (2 * (window.devicePixelRatio || 1));
-        
+
         // Dynamically adjust size scale to perfectly fit mobile and desktop viewports
         const wVal = window.innerWidth;
         const hVal = window.innerHeight;
         const aspect = wVal / hVal;
-        
+
         let sizeScale = Math.min(wVal, hVal);
         if (aspect > 1) {
             // Dynamically scale up on wide screens based on the aspect ratio 
@@ -758,7 +767,7 @@ function init3DRandomWalk() {
         // 1. Determine active particle position (glide interpolation)
         const tElapsed = now - transitionStartTime;
         let activePos = targetPos;
-        
+
         const dxStep = Math.abs(targetPos.x - prevPos.x);
         const dyStep = Math.abs(targetPos.y - prevPos.y);
         const dzStep = Math.abs(targetPos.z - prevPos.z);
@@ -782,7 +791,7 @@ function init3DRandomWalk() {
         cameraCenter.x = 0;
         cameraCenter.y = 0;
         cameraCenter.z = 0;
-        
+
         // Continuous majestic camera rotation around Y-axis
         const theta = now * 0.00004; // yaw (horizontal rotation)
         const phi = Math.PI / 6;    // Y-axis locked at a constant 30 degree incline (pitch) towards the monitor
@@ -796,7 +805,7 @@ function init3DRandomWalk() {
         ctx.save();
         ctx.strokeStyle = gridColor;
         ctx.lineWidth = 0.5;
-        
+
         const gridIntervals = [-200, -100, 0, 100, 200];
         // Lines parallel to X-axis on y=0
         for (let gz of gridIntervals) {
@@ -839,7 +848,7 @@ function init3DRandomWalk() {
             ctx.stroke();
             ctx.restore();
         }
-        
+
         // Y-axis (Green)
         const yAxisStart = project(0, -bounds, 0, theta, phi);
         const yAxisEnd = project(0, bounds, 0, theta, phi);
@@ -877,7 +886,7 @@ function init3DRandomWalk() {
         ctx.save();
         ctx.font = '600 12px "Outfit", sans-serif';
         ctx.textBaseline = 'middle';
-        
+
         // +X Label (Red)
         const ptX = project(labelOffset, 0, 0, theta, phi);
         if (ptX.visible) {
@@ -926,37 +935,37 @@ function init3DRandomWalk() {
         ctx.lineWidth = 0.5;
         ctx.setLineDash([4, 6]);
         const corners = [
-            {x: -bounds, y: -bounds, z: -bounds},
-            {x: bounds, y: -bounds, z: -bounds},
-            {x: bounds, y: bounds, z: -bounds},
-            {x: -bounds, y: bounds, z: -bounds},
-            {x: -bounds, y: -bounds, z: bounds},
-            {x: bounds, y: -bounds, z: bounds},
-            {x: bounds, y: bounds, z: bounds},
-            {x: -bounds, y: bounds, z: bounds}
+            { x: -bounds, y: -bounds, z: -bounds },
+            { x: bounds, y: -bounds, z: -bounds },
+            { x: bounds, y: bounds, z: -bounds },
+            { x: -bounds, y: bounds, z: -bounds },
+            { x: -bounds, y: -bounds, z: bounds },
+            { x: bounds, y: -bounds, z: bounds },
+            { x: bounds, y: bounds, z: bounds },
+            { x: -bounds, y: bounds, z: bounds }
         ];
-        
+
         const projectedCorners = corners.map(c => project(c.x, c.y, c.z, theta, phi));
-        
+
         // Draw bottom square
         ctx.beginPath();
         ctx.moveTo(projectedCorners[0].x, projectedCorners[0].y);
-        for(let i=1; i<4; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
         ctx.closePath();
         ctx.stroke();
-        
+
         // Draw top square
         ctx.beginPath();
         ctx.moveTo(projectedCorners[4].x, projectedCorners[4].y);
-        for(let i=5; i<8; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
+        for (let i = 5; i < 8; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
         ctx.closePath();
         ctx.stroke();
-        
+
         // Draw vertical pillars
-        for(let i=0; i<4; i++) {
+        for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             ctx.moveTo(projectedCorners[i].x, projectedCorners[i].y);
-            ctx.lineTo(projectedCorners[i+4].x, projectedCorners[i+4].y);
+            ctx.lineTo(projectedCorners[i + 4].x, projectedCorners[i + 4].y);
             ctx.stroke();
         }
         ctx.restore();
@@ -969,14 +978,14 @@ function init3DRandomWalk() {
         // Draw older segments
         for (let i = 0; i < pathLen - 2; i++) {
             // Skip drawing segment if it wraps around the boundaries (jumps across screen)
-            const dx = Math.abs(history[i].x - history[i+1].x);
-            const dy = Math.abs(history[i].y - history[i+1].y);
-            const dz = Math.abs(history[i].z - history[i+1].z);
+            const dx = Math.abs(history[i].x - history[i + 1].x);
+            const dy = Math.abs(history[i].y - history[i + 1].y);
+            const dz = Math.abs(history[i].z - history[i + 1].z);
             if (dx > 2 * L || dy > 2 * L || dz > 2 * L) continue;
 
             const p1 = project(history[i].x, history[i].y, history[i].z, theta, phi);
-            const p2 = project(history[i+1].x, history[i+1].y, history[i+1].z, theta, phi);
-            
+            const p2 = project(history[i + 1].x, history[i + 1].y, history[i + 1].z, theta, phi);
+
             if (p1.visible && p2.visible) {
                 // Fade out the oldest steps exponentially to maintain atmospheric background depth
                 const progress = i / pathLen;
@@ -1006,7 +1015,7 @@ function init3DRandomWalk() {
             if (pSecLast.visible && pActiveParticle.visible) {
                 const glowElapsed = now - glowStartTime;
                 const glowFactor = Math.max(0, 1 - glowElapsed / 3500); // decays to 0 over 3.5s
-                
+
                 // Draw baseline sharp line
                 ctx.strokeStyle = 'rgba(243, 217, 162, 0.7)';
                 ctx.lineWidth = 1.8;
@@ -1036,7 +1045,7 @@ function init3DRandomWalk() {
         if (pActiveParticle.visible) {
             const glowElapsed = now - glowStartTime;
             const glowFactor = Math.max(0, 1 - glowElapsed / 3500);
-            
+
             ctx.save();
             const pulse = 1.5 * Math.sin(now / 180);
             const radius = 6.5 + pulse + 4 * glowFactor;
@@ -1044,14 +1053,14 @@ function init3DRandomWalk() {
             // Soft glowing background circle
             ctx.shadowColor = '#f3d9a2';
             ctx.shadowBlur = 12 + 15 * glowFactor;
-            
+
             // Draw radial gradient
             const radGrad = ctx.createRadialGradient(pActiveParticle.x, pActiveParticle.y, 0, pActiveParticle.x, pActiveParticle.y, radius);
             radGrad.addColorStop(0, '#ffffff');
             radGrad.addColorStop(0.3, 'rgba(243, 217, 162, 0.9)');
             radGrad.addColorStop(0.8, 'rgba(169, 132, 77, 0.45)');
             radGrad.addColorStop(1, 'rgba(169, 132, 77, 0)');
-            
+
             ctx.fillStyle = radGrad;
             ctx.beginPath();
             ctx.arc(pActiveParticle.x, pActiveParticle.y, radius, 0, Math.PI * 2);
@@ -1061,7 +1070,7 @@ function init3DRandomWalk() {
 
         requestAnimationFrame(draw);
     }
-    
+
     // Start drawing
     requestAnimationFrame(draw);
 }
