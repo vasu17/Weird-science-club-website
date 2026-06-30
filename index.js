@@ -625,452 +625,302 @@ window.addEventListener('DOMContentLoaded', () => {
     renderPastEvents();
     initEventModal();
     initMailingList();
-    init3DRandomWalk();
+    init3DFractalBackground();
 });
 
-/* --- 3D Lattice Random Walk Background --- */
-function init3DRandomWalk() {
+/* --- 3D Fractal Background --- */
+function init3DFractalBackground() {
     const canvas = document.getElementById('starsCanvas');
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-
-    // Set high-DPI resolution
-    function resizeCanvas() {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
-        ctx.scale(dpr, dpr);
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+        console.warn('WebGL not supported, background fractal disabled.');
+        return;
     }
+
+    // Determine the fractal type from the page name
+    const pageName = window.location.pathname.split('/').pop() || 'index.html';
+    
+    let colorScheme = 'vec3(0.83, 0.68, 0.21) + 0.15 * sin(p.xyz * 2.0)';
+    let glowColor = 'vec3(0.95, 0.85, 0.64)';
+    let distanceFunc = `
+float map(vec3 p) {
+    vec3 w = p;
+    float dr = 1.0;
+    float r = 0.0;
+    float power = 6.0 + 2.0 * sin(u_time * 0.1);
+    for (int i = 0; i < 5; i++) {
+        r = length(w);
+        if (r > 2.0) break;
+        float theta = acos(clamp(w.z / r, -1.0, 1.0));
+        float phi = atan(w.y, w.x);
+        dr = pow(r, power - 1.0) * power * dr + 1.0;
+        float zr = pow(r, power);
+        theta = theta * power;
+        phi = phi * power;
+        w = zr * vec3(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)) + p;
+    }
+    return 0.5 * log(r) * r / dr;
+}
+    `;
+
+    if (pageName.includes('past_events')) {
+        colorScheme = 'vec3(0.35, 0.55, 0.85) + 0.15 * cos(p.zxy * 3.0)';
+        glowColor = 'vec3(0.2, 0.45, 0.85)';
+        distanceFunc = `
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+float map(vec3 p) {
+    float angle = u_time * 0.05;
+    float c = cos(angle);
+    float s = sin(angle);
+    mat2 rot = mat2(c, -s, s, c);
+    float d = sdBox(p, vec3(1.0));
+    float scale = 1.0;
+    for (int i = 0; i < 3; i++) {
+        p.xy = rot * p.xy;
+        p.xz = rot * p.xz;
+        vec3 a = mod(p * scale, 2.0) - 1.0;
+        scale *= 3.0;
+        vec3 r = abs(1.0 - 3.0 * abs(a));
+        float da = max(r.x, r.y);
+        float db = max(r.y, r.z);
+        float dc = max(r.z, r.x);
+        float c_val = (min(da, min(db, dc)) - 1.0) / scale;
+        d = max(d, c_val);
+    }
+    return d;
+}
+        `;
+    } else if (pageName.includes('team')) {
+        colorScheme = 'vec3(0.85, 0.35, 0.55) + 0.15 * sin(p.yzx * 4.0)';
+        glowColor = 'vec3(0.85, 0.25, 0.45)';
+        distanceFunc = `
+float map(vec3 p) {
+    float scale = 2.0;
+    float offset = 1.0;
+    float angle = u_time * 0.04;
+    float c = cos(angle);
+    float s = sin(angle);
+    mat2 rot = mat2(c, -s, s, c);
+    for (int i = 0; i < 5; i++) {
+        p.xy = rot * p.xy;
+        p.xz = rot * p.xz;
+        if (p.x + p.y < 0.0) p.xy = -p.yx;
+        if (p.x + p.z < 0.0) p.xz = -p.zx;
+        if (p.y + p.z < 0.0) p.zy = -p.yz;
+        p = p * scale - offset * (scale - 1.0);
+    }
+    return length(p) * pow(scale, -5.0);
+}
+        `;
+    } else if (pageName.includes('gallery')) {
+        colorScheme = 'vec3(0.25, 0.75, 0.65) + 0.15 * sin(p.xyz * 1.5)';
+        glowColor = 'vec3(0.15, 0.75, 0.55)';
+        distanceFunc = `
+float map(vec3 p) {
+    vec4 z = vec4(p, 0.0);
+    vec4 dz = vec4(1.0, 0.0, 0.0, 0.0);
+    vec4 c_val = vec4(-0.15 + 0.1 * sin(u_time * 0.1), 0.55 + 0.05 * cos(u_time * 0.05), 0.2, 0.15);
+    float r = 0.0;
+    for (int i = 0; i < 6; i++) {
+        r = length(z);
+        if (r > 4.0) break;
+        dz = 2.0 * vec4(
+            z.x*dz.x - z.y*dz.y - z.z*dz.z - z.w*dz.w,
+            z.x*dz.y + z.y*dz.x + z.z*dz.w - z.w*dz.z,
+            z.x*dz.z - z.y*dz.w + z.z*dz.x + z.w*dz.y,
+            z.x*dz.w + z.y*dz.z - z.z*dz.y + z.w*dz.x
+        );
+        z = vec4(
+            z.x*z.x - z.y*z.y - z.z*z.z - z.w*z.w,
+            2.0*z.x*z.y,
+            2.0*z.x*z.z,
+            2.0*z.x*z.w
+        ) + c_val;
+    }
+    return 0.5 * log(r) * r / length(dz);
+}
+        `;
+    } else if (pageName.includes('club')) {
+        colorScheme = 'vec3(0.65, 0.35, 0.95) + 0.15 * cos(p.yyy * 5.0)';
+        glowColor = 'vec3(0.55, 0.15, 0.85)';
+        distanceFunc = `
+float map(vec3 p) {
+    p = abs(mod(p - 1.5, 3.0) - 1.5);
+    float scale = 1.35 + 0.05 * sin(u_time * 0.05);
+    for (int i = 0; i < 4; i++) {
+        p = abs(p) - 0.45;
+        float c = cos(0.35);
+        float s = sin(0.35);
+        p.xy = mat2(c, -s, s, c) * p.xy;
+        p.xz = mat2(c, -s, s, c) * p.xz;
+        p *= scale;
+    }
+    return (length(p) - 0.2) / pow(scale, 4.0);
+}
+        `;
+    }
+
+    const vsSource = `
+        attribute vec2 position;
+        void main() {
+            gl_Position = vec4(position, 0.0, 1.0);
+        }
+    `;
+
+    const fsSource = `
+        precision highp float;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        ${distanceFunc}
+
+        vec3 getNormal(vec3 p) {
+            vec2 e = vec2(0.002, 0.0);
+            return normalize(vec3(
+                map(p + e.xyy) - map(p - e.xyy),
+                map(p + e.yxy) - map(p - e.yxy),
+                map(p + e.yyx) - map(p - e.yyx)
+            ));
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            
+            // Background gradient matching the CSS fixed background (#0f1523 top to #06080d bottom)
+            float grad = gl_FragCoord.y / u_resolution.y;
+            vec3 bgGradColor = mix(vec3(0.0235, 0.0314, 0.051), vec3(0.0588, 0.0824, 0.1373), grad);
+            
+            // Camera setup
+            float time = u_time * 0.08;
+            float angle = time * 0.15;
+            vec3 ro = vec3(2.5 * sin(angle), 1.0 * sin(time * 0.08), 2.5 * cos(angle));
+            vec3 ta = vec3(0.0, 0.0, 0.0);
+            
+            vec3 ww = normalize(ta - ro);
+            vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
+            vec3 vv = normalize(cross(uu, ww));
+            vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.2 * ww);
+            
+            float t = 0.0;
+            float max_d = 8.0;
+            int steps = 0;
+            float min_dist = 1e10;
+            
+            for (int i = 0; i < 40; i++) {
+                vec3 p = ro + rd * t;
+                float d = map(p);
+                min_dist = min(min_dist, d);
+                if (d < 0.003 || t > max_d) break;
+                t += d;
+                steps = i;
+            }
+            
+            vec3 color = vec3(0.0);
+            
+            if (t < max_d) {
+                vec3 p = ro + rd * t;
+                vec3 normal = getNormal(p);
+                vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+                float diff = max(dot(normal, lightDir), 0.0);
+                float ao = 1.0 - float(steps) / 40.0;
+                
+                vec3 baseColor = ${colorScheme};
+                color = baseColor * (diff + 0.1) * ao;
+                
+                // Add soft fog blending into the blue background gradient
+                color = mix(color, bgGradColor, 1.0 - exp(-0.02 * t * t));
+            } else {
+                float glow = exp(-20.0 * min_dist);
+                color = ${glowColor} * glow * 0.35;
+                color += bgGradColor; // Blend glow with the background gradient
+            }
+            
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+
+    // Compile shaders
+    function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+    if (!vertexShader || !fragmentShader) return;
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('Program link error:', gl.getProgramInfoLog(program));
+        return;
+    }
+
+    // Set up full screen quad
+    const positionAttributeLocation = gl.getAttribLocation(program, 'position');
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    const positions = [
+        -1, -1,
+         1, -1,
+        -1,  1,
+        -1,  1,
+         1, -1,
+         1,  1,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
+    const timeUniformLocation = gl.getUniformLocation(program, 'u_time');
+
+    // High-performance canvas resizing: use full resolution for crisp rendering
+    function resizeCanvas() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Lattice & Step settings
-    const L = 25; // Lattice step distance (250 is exactly divisible by 25!)
-    const bounds = 250; // Cube bounds from -250 to 250 (500x500x500 space)
+    let startTime = Date.now();
 
-    // Smooth camera focus center
-    let cameraCenter = { x: 0, y: 0, z: 0 };
+    function render() {
+        const currentTime = (Date.now() - startTime) * 0.001;
 
-    // History array starting at center
-    let history = [{ x: 0, y: 0, z: 0 }];
+        gl.clearColor(0.04, 0.06, 0.1, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Cardinal directions in 3D cubic lattice
-    const directions = [
-        { x: L, y: 0, z: 0 }, { x: -L, y: 0, z: 0 },
-        { x: 0, y: L, z: 0 }, { x: 0, y: -L, z: 0 },
-        { x: 0, y: 0, z: L }, { x: 0, y: 0, z: -L }
-    ];
+        gl.useProgram(program);
 
-    // Helper to pick next valid random step (periodic boundary wrapping)
-    function getNextStep(current) {
-        const dir = directions[Math.floor(Math.random() * directions.length)];
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-        // Symmetrical Periodic Modulo Wrapping: maps 251 -> -250 and -251 -> 250
-        function wrap(val) {
-            const minVal = -250;
-            const maxVal = 250;
-            const range = maxVal - minVal + 1; // 501
-            let shifted = val - minVal;
-            shifted = ((shifted % range) + range) % range;
-            return shifted + minVal;
-        }
+        gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+        gl.uniform1f(timeUniformLocation, currentTime);
 
-        return {
-            x: wrap(current.x + dir.x),
-            y: wrap(current.y + dir.y),
-            z: wrap(current.z + dir.z)
-        };
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        requestAnimationFrame(render);
     }
 
-    // Precompute 5000 steps of the walk on startup
-    for (let i = 0; i < 5000; i++) {
-        const last = history[history.length - 1];
-        history.push(getNextStep(last));
-    }
-
-    // Transition variables for 5-second interval movement
-    let prevPos = history[history.length - 2];
-    let targetPos = history[history.length - 1];
-    let transitionStartTime = Date.now() - 5000; // start immediately in final position
-    let glowStartTime = Date.now() - 5000;
-    const transitionDuration = 1000; // 1 second glide
-    const stepInterval = 5000; // 5 seconds step cycle
-
-    // Schedule next steps every 5 seconds
-    setInterval(() => {
-        const last = history[history.length - 1];
-        const next = getNextStep(last);
-
-        history.push(next);
-        if (history.length > 5001) {
-            history.shift(); // Keep history exactly at 5000 steps + active next step
-        }
-
-        prevPos = history[history.length - 2];
-        targetPos = history[history.length - 1];
-        transitionStartTime = Date.now();
-        glowStartTime = Date.now();
-    }, stepInterval);
-
-    // 3D Perspective Projection centered around camera focus
-    function project(x, y, z, theta, phi) {
-        // Position relative to current camera center
-        const dx = x - cameraCenter.x;
-        const dy = y - cameraCenter.y;
-        const dz = z - cameraCenter.z;
-
-        // Rotate around Y-axis (yaw)
-        const x1 = dx * Math.cos(theta) - dz * Math.sin(theta);
-        const z1 = dx * Math.sin(theta) + dz * Math.cos(theta);
-
-        // Rotate around X-axis (pitch)
-        const y2 = dy * Math.cos(phi) - z1 * Math.sin(phi);
-        const z2 = dy * Math.sin(phi) + z1 * Math.cos(phi);
-
-        const F = 600; // Focal length
-        const D = 700; // Camera distance from center focus
-        const scale = F / (F + z2 + D);
-
-        const cx = canvas.width / (2 * (window.devicePixelRatio || 1));
-        const cy = canvas.height / (2 * (window.devicePixelRatio || 1));
-
-        // Dynamically adjust size scale to perfectly fit mobile and desktop viewports
-        const wVal = window.innerWidth;
-        const hVal = window.innerHeight;
-        const aspect = wVal / hVal;
-
-        let sizeScale = Math.min(wVal, hVal);
-        if (aspect > 1) {
-            // Dynamically scale up on wide screens based on the aspect ratio 
-            // so it covers more of the desktop width without being zoomed out.
-            sizeScale = hVal * (1 + (aspect - 1) * 0.5);
-        }
-        const projectedScale = scale * (sizeScale / 420);
-
-        return {
-            x: cx + x1 * projectedScale,
-            y: cy + y2 * projectedScale,
-            z: z2,
-            visible: (z2 + D > 0)
-        };
-    }
-
-    // Animation render loop
-    function draw() {
-        const w = canvas.width / (window.devicePixelRatio || 1);
-        const h = canvas.height / (window.devicePixelRatio || 1);
-        ctx.clearRect(0, 0, w, h);
-
-        const now = Date.now();
-
-        // 1. Determine active particle position (glide interpolation)
-        const tElapsed = now - transitionStartTime;
-        let activePos = targetPos;
-
-        const dxStep = Math.abs(targetPos.x - prevPos.x);
-        const dyStep = Math.abs(targetPos.y - prevPos.y);
-        const dzStep = Math.abs(targetPos.z - prevPos.z);
-        const isWrappingStep = (dxStep > 2 * L || dyStep > 2 * L || dzStep > 2 * L);
-
-        if (tElapsed < transitionDuration) {
-            if (isWrappingStep) {
-                activePos = prevPos;
-            } else {
-                const u = tElapsed / transitionDuration;
-                const ease = 1 - Math.pow(1 - u, 3); // easeOutCubic
-                activePos = {
-                    x: prevPos.x + (targetPos.x - prevPos.x) * ease,
-                    y: prevPos.y + (targetPos.y - prevPos.y) * ease,
-                    z: prevPos.z + (targetPos.z - prevPos.z) * ease
-                };
-            }
-        }
-
-        // 2. Camera remains fixed at the origin (0, 0, 0) so the orbit rotation is stable and centered around the Y-axis
-        cameraCenter.x = 0;
-        cameraCenter.y = 0;
-        cameraCenter.z = 0;
-
-        // Continuous majestic camera rotation around Y-axis
-        const theta = now * 0.00004; // yaw (horizontal rotation)
-        const phi = Math.PI / 6;    // Y-axis locked at a constant 30 degree incline (pitch) towards the monitor
-
-        // Grid colors - extremely dark version of gold/yellow accents
-        const gridColor = 'rgba(26, 19, 7, 0.4)'; // extremely dark version of gold/yellow
-        const axisColor = 'rgba(38, 28, 10, 0.5)'; // slightly more prominent but still very dark gold
-
-        // 1. Draw Subtle Reference Grid & Origin
-        // Ground plane (y=0) grid lines
-        ctx.save();
-        ctx.strokeStyle = gridColor;
-        ctx.lineWidth = 0.5;
-
-        const gridIntervals = [-200, -100, 0, 100, 200];
-        // Lines parallel to X-axis on y=0
-        for (let gz of gridIntervals) {
-            const p1 = project(-bounds, 0, gz, theta, phi);
-            const p2 = project(bounds, 0, gz, theta, phi);
-            if (p1.visible && p2.visible) {
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            }
-        }
-        // Lines parallel to Z-axis on y=0
-        for (let gx of gridIntervals) {
-            const p1 = project(gx, 0, -bounds, theta, phi);
-            const p2 = project(gx, 0, bounds, theta, phi);
-            if (p1.visible && p2.visible) {
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            }
-        }
-
-        // Draw central X, Y, Z coordinate axis lines passing through the origin (0,0,0) in vibrant RGB
-        const axisLW = 1.2;
-
-        // X-axis (Red)
-        const xAxisStart = project(-bounds, 0, 0, theta, phi);
-        const xAxisEnd = project(bounds, 0, 0, theta, phi);
-        if (xAxisStart.visible && xAxisEnd.visible) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 59, 48, 0.85)';
-            ctx.lineWidth = axisLW;
-            ctx.shadowColor = 'rgba(255, 59, 48, 0.6)';
-            ctx.shadowBlur = 6;
-            ctx.beginPath();
-            ctx.moveTo(xAxisStart.x, xAxisStart.y);
-            ctx.lineTo(xAxisEnd.x, xAxisEnd.y);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Y-axis (Green)
-        const yAxisStart = project(0, -bounds, 0, theta, phi);
-        const yAxisEnd = project(0, bounds, 0, theta, phi);
-        if (yAxisStart.visible && yAxisEnd.visible) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(52, 199, 89, 0.85)';
-            ctx.lineWidth = axisLW;
-            ctx.shadowColor = 'rgba(52, 199, 89, 0.6)';
-            ctx.shadowBlur = 6;
-            ctx.beginPath();
-            ctx.moveTo(yAxisStart.x, yAxisStart.y);
-            ctx.lineTo(yAxisEnd.x, yAxisEnd.y);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Z-axis (Blue)
-        const zAxisStart = project(0, 0, -bounds, theta, phi);
-        const zAxisEnd = project(0, 0, bounds, theta, phi);
-        if (zAxisStart.visible && zAxisEnd.visible) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(0, 122, 255, 0.85)';
-            ctx.lineWidth = axisLW;
-            ctx.shadowColor = 'rgba(0, 122, 255, 0.6)';
-            ctx.shadowBlur = 6;
-            ctx.beginPath();
-            ctx.moveTo(zAxisStart.x, zAxisStart.y);
-            ctx.lineTo(zAxisEnd.x, zAxisEnd.y);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Draw 3D axis labels (+X, +Y, -Y, +Z)
-        const labelOffset = bounds + 20;
-        ctx.save();
-        ctx.font = '600 12px "Outfit", sans-serif';
-        ctx.textBaseline = 'middle';
-
-        // +X Label (Red)
-        const ptX = project(labelOffset, 0, 0, theta, phi);
-        if (ptX.visible) {
-            ctx.fillStyle = 'rgba(255, 100, 100, 1)';
-            ctx.shadowColor = 'rgba(255, 59, 48, 0.8)';
-            ctx.shadowBlur = 6;
-            ctx.textAlign = ptX.x < w / 2 ? 'right' : 'left';
-            ctx.fillText('+X', ptX.x + (ptX.x < w / 2 ? -7 : 7), ptX.y);
-        }
-
-        // +Y Label (Green)
-        const ptYPos = project(0, -labelOffset, 0, theta, phi);
-        if (ptYPos.visible) {
-            ctx.fillStyle = 'rgba(100, 240, 120, 1)';
-            ctx.shadowColor = 'rgba(52, 199, 89, 0.8)';
-            ctx.shadowBlur = 6;
-            ctx.textAlign = 'center';
-            ctx.fillText('+Y', ptYPos.x, ptYPos.y - 10);
-        }
-
-        // -Y Label (Green)
-        const ptYNeg = project(0, labelOffset, 0, theta, phi);
-        if (ptYNeg.visible) {
-            ctx.fillStyle = 'rgba(100, 240, 120, 1)';
-            ctx.shadowColor = 'rgba(52, 199, 89, 0.8)';
-            ctx.shadowBlur = 6;
-            ctx.textAlign = 'center';
-            ctx.fillText('−Y', ptYNeg.x, ptYNeg.y + 10);
-        }
-
-        // +Z Label (Blue)
-        const ptZ = project(0, 0, -labelOffset, theta, phi);
-        if (ptZ.visible) {
-            ctx.fillStyle = 'rgba(80, 190, 255, 1)';
-            ctx.shadowColor = 'rgba(0, 122, 255, 0.8)';
-            ctx.shadowBlur = 6;
-            ctx.textAlign = ptZ.x < w / 2 ? 'right' : 'left';
-            ctx.fillText('+Z', ptZ.x + (ptZ.x < w / 2 ? -7 : 7), ptZ.y);
-        }
-        ctx.restore();
-        ctx.restore();
-
-        // 2. Draw 3D Bounding Cube (very faint gold)
-        ctx.save();
-        ctx.strokeStyle = 'rgba(169, 132, 77, 0.035)';
-        ctx.lineWidth = 0.5;
-        ctx.setLineDash([4, 6]);
-        const corners = [
-            { x: -bounds, y: -bounds, z: -bounds },
-            { x: bounds, y: -bounds, z: -bounds },
-            { x: bounds, y: bounds, z: -bounds },
-            { x: -bounds, y: bounds, z: -bounds },
-            { x: -bounds, y: -bounds, z: bounds },
-            { x: bounds, y: -bounds, z: bounds },
-            { x: bounds, y: bounds, z: bounds },
-            { x: -bounds, y: bounds, z: bounds }
-        ];
-
-        const projectedCorners = corners.map(c => project(c.x, c.y, c.z, theta, phi));
-
-        // Draw bottom square
-        ctx.beginPath();
-        ctx.moveTo(projectedCorners[0].x, projectedCorners[0].y);
-        for (let i = 1; i < 4; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
-        ctx.closePath();
-        ctx.stroke();
-
-        // Draw top square
-        ctx.beginPath();
-        ctx.moveTo(projectedCorners[4].x, projectedCorners[4].y);
-        for (let i = 5; i < 8; i++) ctx.lineTo(projectedCorners[i].x, projectedCorners[i].y);
-        ctx.closePath();
-        ctx.stroke();
-
-        // Draw vertical pillars
-        for (let i = 0; i < 4; i++) {
-            ctx.beginPath();
-            ctx.moveTo(projectedCorners[i].x, projectedCorners[i].y);
-            ctx.lineTo(projectedCorners[i + 4].x, projectedCorners[i + 4].y);
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        // 3. Draw Walk Path
-        // We draw the segments from oldest to newest with a beautiful opacity & size gradient
-        ctx.save();
-        const pathLen = history.length;
-
-        // Draw older segments
-        for (let i = 0; i < pathLen - 2; i++) {
-            // Skip drawing segment if it wraps around the boundaries (jumps across screen)
-            const dx = Math.abs(history[i].x - history[i + 1].x);
-            const dy = Math.abs(history[i].y - history[i + 1].y);
-            const dz = Math.abs(history[i].z - history[i + 1].z);
-            if (dx > 2 * L || dy > 2 * L || dz > 2 * L) continue;
-
-            const p1 = project(history[i].x, history[i].y, history[i].z, theta, phi);
-            const p2 = project(history[i + 1].x, history[i + 1].y, history[i + 1].z, theta, phi);
-
-            if (p1.visible && p2.visible) {
-                // Fade out the oldest steps exponentially to maintain atmospheric background depth
-                const progress = i / pathLen;
-                const opacity = 0.001 + Math.pow(progress, 4) * 0.35;
-                ctx.strokeStyle = `rgba(169, 132, 77, ${opacity})`;
-                ctx.lineWidth = 0.3 + Math.pow(progress, 4) * 1.5;
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            }
-        }
-
-        // 4. Draw Most Recent Segment with Transition Glow
-        const secLastPos = history[pathLen - 2];
-        const dxLast = Math.abs(secLastPos.x - activePos.x);
-        const dyLast = Math.abs(secLastPos.y - activePos.y);
-        const dzLast = Math.abs(secLastPos.z - activePos.z);
-
-        // Project active particle position (always needed for particle dot drawing below)
-        const pActiveParticle = project(activePos.x, activePos.y, activePos.z, theta, phi);
-
-        // Only draw connection line if the particle did not wrap around (jump)
-        if (dxLast <= 2 * L && dyLast <= 2 * L && dzLast <= 2 * L) {
-            const pSecLast = project(secLastPos.x, secLastPos.y, secLastPos.z, theta, phi);
-
-            if (pSecLast.visible && pActiveParticle.visible) {
-                const glowElapsed = now - glowStartTime;
-                const glowFactor = Math.max(0, 1 - glowElapsed / 3500); // decays to 0 over 3.5s
-
-                // Draw baseline sharp line
-                ctx.strokeStyle = 'rgba(243, 217, 162, 0.7)';
-                ctx.lineWidth = 1.8;
-                ctx.beginPath();
-                ctx.moveTo(pSecLast.x, pSecLast.y);
-                ctx.lineTo(pActiveParticle.x, pActiveParticle.y);
-                ctx.stroke();
-
-                // Draw glowing overlay
-                if (glowFactor > 0) {
-                    ctx.save();
-                    ctx.shadowColor = '#f3d9a2';
-                    ctx.shadowBlur = 18 * glowFactor;
-                    ctx.strokeStyle = `rgba(243, 217, 162, ${0.3 + 0.6 * glowFactor})`;
-                    ctx.lineWidth = 1.8 + 2.5 * glowFactor;
-                    ctx.beginPath();
-                    ctx.moveTo(pSecLast.x, pSecLast.y);
-                    ctx.lineTo(pActiveParticle.x, pActiveParticle.y);
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-        }
-        ctx.restore();
-
-        // 5. Draw Glowing Particle
-        if (pActiveParticle.visible) {
-            const glowElapsed = now - glowStartTime;
-            const glowFactor = Math.max(0, 1 - glowElapsed / 3500);
-
-            ctx.save();
-            const pulse = 1.5 * Math.sin(now / 180);
-            const radius = 6.5 + pulse + 4 * glowFactor;
-
-            // Soft glowing background circle
-            ctx.shadowColor = '#f3d9a2';
-            ctx.shadowBlur = 12 + 15 * glowFactor;
-
-            // Draw radial gradient
-            const radGrad = ctx.createRadialGradient(pActiveParticle.x, pActiveParticle.y, 0, pActiveParticle.x, pActiveParticle.y, radius);
-            radGrad.addColorStop(0, '#ffffff');
-            radGrad.addColorStop(0.3, 'rgba(243, 217, 162, 0.9)');
-            radGrad.addColorStop(0.8, 'rgba(169, 132, 77, 0.45)');
-            radGrad.addColorStop(1, 'rgba(169, 132, 77, 0)');
-
-            ctx.fillStyle = radGrad;
-            ctx.beginPath();
-            ctx.arc(pActiveParticle.x, pActiveParticle.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        requestAnimationFrame(draw);
-    }
-
-    // Start drawing
-    requestAnimationFrame(draw);
+    requestAnimationFrame(render);
 }

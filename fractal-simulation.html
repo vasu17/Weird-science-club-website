@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Fractal Explorer & Simulator - Axis Mundi</title>
+    <meta name="description"
+        content="Explore 3D fractals interactively. Adjust zoom, morphing speed, fractal types, and rendering steps in real time. Try our 2D Julia Set playground.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        /* Custom dropdown styling for fractal and theme selectors */
+        .sim-select {
+            width: 100%;
+            background: rgba(11, 16, 26, 0.6);
+            border: 1px solid rgba(169, 132, 77, 0.4);
+            border-radius: 6px;
+            color: #f3d9a2;
+            padding: 8px 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .sim-select:hover, .sim-select:focus {
+            border-color: #f3d9a2;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.2);
+        }
+        .sim-select option {
+            background: #0b101a;
+            color: #f3d9a2;
+        }
+        /* Custom action button styling */
+        .sim-action-btn {
+            background: rgba(169, 132, 77, 0.15);
+            border: 1px solid rgba(169, 132, 77, 0.5);
+            color: #f3d9a2;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .sim-action-btn:hover {
+            background: rgba(243, 217, 162, 0.25);
+            border-color: #f3d9a2;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.4);
+            transform: translateY(-1px);
+        }
+        .sim-action-btn:active {
+            transform: translateY(1px);
+        }
+        .btn-active {
+            background: rgba(243, 217, 162, 0.3) !important;
+            border-color: #f3d9a2 !important;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.5) !important;
+        }
+        /* 2D game board adaptations */
+        .sim-game-board-container {
+            border: 2px solid rgba(169, 132, 77, 0.4);
+            box-shadow: 0 0 25px rgba(169, 132, 77, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #030508;
+            cursor: crosshair;
+        }
+        .sim-game-hud {
+            background: rgba(11, 16, 26, 0.8) !important;
+            border-top: 1px solid rgba(169, 132, 77, 0.3);
+        }
+    </style>
+</head>
+
+<body class="sim-page">
+
+    <!-- === Full-Page Interactive 3D Canvas Visualizer === -->
+    <div class="sim-fullpage-viewport" id="viewportContainer">
+        <canvas id="simCanvas"></canvas>
+
+        <!-- Floating title overlay on canvas -->
+        <div class="sim-canvas-overlay">
+            <div class="sim-canvas-title">
+                <span class="sim-canvas-label">AXIS MUNDI</span>
+                <h1 class="sim-canvas-heading">3D Fractal Simulator</h1>
+                <p class="sim-canvas-sub">Drag to orbit &nbsp;·&nbsp; Adjust parameters below</p>
+            </div>
+        </div>
+
+        <!-- Scroll arrow at bottom of canvas -->
+        <div class="sim-scroll-down" id="scrollArrow">
+            <span>Scroll for Science</span>
+            <svg class="scroll-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- === Control Deck (below canvas / floating) === -->
+    <div class="sim-below-section" id="controlSection">
+        <!-- Collapsible header / drag-handle -->
+        <div class="sim-panel-header" id="panelHeader">
+            <div class="sim-panel-header-left">
+                <span class="sim-panel-drag-dots">⠿</span>
+                <span class="sim-panel-title">Fractal Parameters</span>
+            </div>
+            <button class="sim-panel-collapse-btn" id="collapseBtn" title="Expand controls" aria-expanded="false"
+                aria-controls="panelBody">
+                <svg class="sim-collapse-chevron collapsed" id="collapseChevron" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" width="16" height="16">
+                    <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+        <div class="sim-panel-body collapsed" id="panelBody">
+            <div class="sim-control-panel">
+
+                <!-- Left cluster: Primary controls -->
+                <div class="sim-deck-cluster">
+                    <h3 class="sim-deck-heading">Primary Settings</h3>
+
+                    <!-- Dropdown: Fractal Type -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Fractal Type</span>
+                        </div>
+                        <select id="fractalType" class="sim-select">
+                            <option value="mandelbulb">Mandelbulb (Cosmic Bulb)</option>
+                            <option value="menger">Menger Sponge (Geometric Fold)</option>
+                            <option value="sierpinski">Sierpinski IFS (Pyramid Cluster)</option>
+                            <option value="julia">Quaternion Julia (Organic Fluid)</option>
+                            <option value="cave">Space-Folding Cave (Infinite Tunnel)</option>
+                        </select>
+                    </div>
+
+                    <!-- Slider 1: Camera Zoom -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Camera Distance (Zoom)</span>
+                            <span id="zoomVal" class="sim-value-badge">2.5</span>
+                        </div>
+                        <input type="range" id="zoomSlider" class="sim-slider" min="1.2" max="6.0" step="0.1"
+                            value="2.5">
+                    </div>
+
+                    <!-- Slider 2: Evolution Speed -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Morphing Speed</span>
+                            <span id="speedVal" class="sim-value-badge">1.0x</span>
+                        </div>
+                        <input type="range" id="speedSlider" class="sim-slider" min="0.0" max="3.0" step="0.1"
+                            value="1.0">
+                    </div>
+                </div>
+
+                <!-- Right cluster: Advanced / Color controls -->
+                <div class="sim-deck-cluster sim-deck-cluster--wide">
+                    <h3 class="sim-deck-heading">Advanced Parameters</h3>
+
+                    <div class="sim-weights-table" style="grid-template-columns: 1fr; gap: 15px; margin-top: 10px;">
+                        <!-- Slider 3: Fractal Iterations -->
+                        <div class="sim-control-group" style="padding: 0;">
+                            <div class="sim-control-label">
+                                <span>Mathematical Iteration Depth</span>
+                                <span id="iterVal" class="sim-value-badge">6</span>
+                            </div>
+                            <input type="range" id="iterSlider" class="sim-slider" min="2" max="10" step="1"
+                                value="6">
+                        </div>
+
+                        <!-- Slider 4: Raymarching steps -->
+                        <div class="sim-control-group" style="padding: 0;">
+                            <div class="sim-control-label">
+                                <span>Quality Steps (Performance)</span>
+                                <span id="stepsVal" class="sim-value-badge">40</span>
+                            </div>
+                            <input type="range" id="stepsSlider" class="sim-slider" min="15" max="80" step="5"
+                                value="40">
+                        </div>
+
+                        <!-- Theme Dropdown & Play/Pause controls -->
+                        <div class="sim-control-group" style="padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <div class="sim-control-label" style="margin-bottom: 5px;">
+                                    <span>Color Theme Preset</span>
+                                </div>
+                                <select id="themeSelector" class="sim-select">
+                                    <option value="gold">Gold & Amber (Mandelbulb default)</option>
+                                    <option value="blue">Sapphire Blue (Menger default)</option>
+                                    <option value="pink">Ruby Pink (Sierpinski default)</option>
+                                    <option value="teal">Mint Teal (Julia default)</option>
+                                    <option value="violet">Violet Cave (Cave default)</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button id="playPauseBtn" class="sim-action-btn btn-active" title="Toggle morph animation">
+                                    <span id="playIcon">⏸</span> Morphing
+                                </button>
+                                <button id="resetParamsBtn" class="sim-action-btn" title="Reset parameters to default">
+                                    <span>⟲</span> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /.sim-panel-body -->
+    </div>
+
+    <!-- === Scroll Down Indicator to Education === -->
+    <div class="sim-edu-scroll-hint" id="eduScrollHint">
+        <span>Scroll for the Science</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20">
+            <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+        </svg>
+    </div>
+
+    <!-- === Responsive Grid for Educational Science Cards === -->
+    <div class="sim-edu-grid" id="education-section">
+
+        <!-- Box 1: Short TL;DR Version -->
+        <div class="event-description-box who-we-are-box" style="margin-top: 0; text-align: left;">
+            <h3>The TL;DR on Fractals</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                A fractal is an geometric shape that contains infinite recursion and detail.
+            </p>
+            <p>
+                Imagine zooming into a rugged coastline or a snowflake. No matter how close you look, the structure
+                never simplifies — instead, you discover smaller copies of the exact same patterns repeating
+                infinitely. This property is known as <strong>self-similarity</strong>.
+            </p>
+            <p style="margin-top: 10px;">
+                While traditional geometry deals with clean integer dimensions (a 1D line, a 2D square, a 3D cube),
+                fractals occupy **fractional dimensions**. A highly folded fractal curve might have a dimension of
+                1.26, packing infinite length into a finite area!
+            </p>
+            <p style="margin-top: 10px;">
+                In computer graphics, we render three-dimensional fractals using a process called **raymarching**. 
+                Unlike classic polygons, we shoot virtual rays from the camera for each pixel and calculate the mathematical 
+                distance to the fractal surface, stepping along the ray until we hit the infinite boundary.
+            </p>
+        </div>
+
+        <!-- Box 2: 2D Morphing Playground -->
+        <div class="event-description-box who-we-are-box sim-game-box" style="margin-top: 0; text-align: left;">
+            <h3 class="sim-game-title"
+                style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-light); margin-bottom: 10px; letter-spacing: 0.05em;">
+                Try it Yourself: 2D Julia Set Morphing</h3>
+            <p style="font-weight: 500; margin-bottom: 20px; color: var(--gold-light);">
+                Move your cursor over the screen below to morph the fractal shape in real-time! <span style="display: block; font-size: 0.85rem; font-style: italic; color: #dfcdac; margin-top: 5px;">Double-click the canvas to lock or unlock the constant.</span>
+            </p>
+
+            <div class="sim-game-layout">
+                <!-- Left: Big Canvas + HUD -->
+                <div class="sim-game-board-container">
+                    <canvas id="gameCanvas" width="400" height="400"></canvas>
+                    <div class="sim-game-hud">
+                        <div class="hud-item">
+                            <span class="hud-label">Real (C):</span>
+                            <span id="juliaReal" class="hud-value">-0.7</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Imag (C):</span>
+                            <span id="juliaImag" class="hud-value">0.27</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Interactive:</span>
+                            <span id="juliaStatus" class="hud-value">Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Information & actions -->
+                <div class="sim-game-die-right">
+                    <p style="font-size: 0.9rem; line-height: 1.4; color: var(--gold-light); margin-bottom: 15px;">
+                        This 2D canvas displays the **Julia Set**, calculated using the formula:
+                        <br><strong style="font-size: 1rem; color: #ffffff;">Z<sub>n+1</sub> = Z<sub>n</sub><sup>2</sup> + C</strong>
+                        <br><br>
+                        Moving your mouse changes the complex constant **C**. By locking the constant, you can pause it at your favorite design. You can toggle this by clicking the button below or double-clicking the canvas.
+                    </p>
+                    <div class="game-action-buttons" style="flex-direction: column; width: 100%; gap: 10px;">
+                        <button id="lockJuliaBtn" class="sim-action-btn" style="width: 100%; justify-content: center;">
+                            <span>🔒</span> Lock Constant
+                        </button>
+                        <button id="colorJuliaBtn" class="sim-action-btn" style="width: 100%; justify-content: center;">
+                            <span>🎨</span> Swap Palette
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Box 3: Fractals in the Natural World -->
+        <div class="event-description-box contact-box" style="margin-top: 0; text-align: left;">
+            <h3>Where Are They in Real Life?</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Fractal architecture is the signature language of nature.
+            </p>
+            <ul class="sim-real-life-list">
+                <li>✦ <strong>Trees and Leaves:</strong> branches split off into twigs, which split off into leaf veins, mimicking the same geometric expansion rules at every level.</li>
+                <li>✦ <strong>Lungs and Blood Vessels:</strong> our circulatory and respiratory systems branch fractally, maximizing the surface area for oxygen exchange in a compact volume.</li>
+                <li>✦ <strong>Coastlines:</strong> the famous "Coastline Paradox" shows that measuring a coast with smaller rulers yields an infinitely longer perimeter because of fractal cragginess.</li>
+                <li>✦ <strong>River Networks:</strong> drainage basins converge in tributary branches that form perfect fractal structures when viewed from orbit.</li>
+                <li>✦ <strong>Snowflakes & Crystals:</strong> water molecules crystallizing form complex self-similar dendritic structures under microscopic bounds.</li>
+            </ul>
+        </div>
+
+        <!-- Box 4: History and the Mandelbrot Set -->
+        <div class="event-description-box" style="margin-top: 0; text-align: left;">
+            <h3>The Mathematics of the Infinite</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Benoit Mandelbrot and the revolution of fractal geometry.
+            </p>
+            <p>
+                For centuries, mathematicians dismissed self-similar, continuous-but-nowhere-differentiable equations (like the Weierstrass function or the Koch snowflake) as "mathematical monsters" that had no relevance to physical reality.
+            </p>
+            <p style="margin-top: 10px;">
+                In 1979, IBM researcher <strong>Benoit Mandelbrot</strong> used the power of early computers to visualize these equations. By plotting the simple boundary of numbers that remain stable under iteration, he discovered the famous **Mandelbrot Set** — showing that infinite complexity can arise from a simple formula.
+            </p>
+            <p style="margin-top: 10px;">
+                In 2009, mathematical explorers on the Fractal Forums extended this 2D boundary into three dimensions, creating the **Mandelbulb**, a stunning 3D shadow of Mandelbrot's complex number dynamics.
+            </p>
+        </div>
+
+        <!-- Box 5: Further Reading -->
+        <div class="event-description-box sim-reading-box" style="margin-top: 0; text-align: left;">
+            <h3>Further Reading</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Explore further — from video visualizations to articles about fractal physics.
+            </p>
+
+            <div class="sim-reading-sections">
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Videos</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.youtube.com/watch?v=gB9n2gHsHN4" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> PBS: What's so special about fractals?
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=LqbZpur385M" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Veritasium: The Mandelbrot Set
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=gB1F9G0J2q8" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> 3Blue1Brown: Fractal Dimensions
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=0jGaio87u3A" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Mathologer: Inside Mandelbrot
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Articles</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.britannica.com/science/fractal" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Britannica: Fractal
+                        </a>
+                        <a href="https://www.mandelbrot.org/" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Benoit Mandelbrot Foundation
+                        </a>
+                        <a href="http://www.fractalforums.com/" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Fractal Forums Community
+                        </a>
+                        <a href="https://www.nature.com/articles/news990527-3" target="_blank"
+                            rel="noopener noreferrer" class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">✦</span> Nature: Fractals in Physiology
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- === End of Educational Grid === -->
+
+    <!-- === Footer Navigation === -->
+    <footer class="sim-footer-nav">
+        <nav>
+            <a href="index.html">Upcoming Events</a>
+            <span class="sim-footer-sep">✦</span>
+            <a href="past_events.html">Past Events</a>
+            <span class="sim-footer-sep">✦</span>
+            <a href="team.html">Meet the Team</a>
+            <span class="sim-footer-sep">✦</span>
+            <a href="gallery.html">Gallery</a>
+        </nav>
+        <p class="sim-footer-credit">Axis Mundi Science Club &nbsp;✦&nbsp; 3D Fractal Explorer</p>
+    </footer>
+
+    <!-- Scripts: index.js background, fractal-simulation.js -->
+    <script src="index.js"></script>
+    <script src="fractal-simulation.js"></script>
+</body>
+
+</html>
