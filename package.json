@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/vasu17/Weird-science-club-website#readme",
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
+    "@vercel/analytics": "^2.0.1"
+  },
+  "devDependencies": {
     "puppeteer": "^25.0.4"
   },
   "type": "commonjs"
