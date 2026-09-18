@@ -89,8 +89,19 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    z-index: -2;
+    pointer-events: none !important;
+    display: block !important;
+}
+
+#feynmanCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: -1;
-    pointer-events: none;
+    pointer-events: none !important;
     display: block !important;
 }
 

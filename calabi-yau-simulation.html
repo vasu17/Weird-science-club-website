@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Calabi-Yau Manifold Simulator & Explorer - Axis Mundi</title>
+    <meta name="description"
+        content="Explore Calabi-Yau manifolds interactively in 3D. Visualize 6D string theory compactifications, adjust degrees from Fermat cubics to quintic threefolds, morph 4D hyperspace angles, and explore complex topology.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        /* Custom dropdown styling for manifold selector */
+        .sim-select {
+            width: 100%;
+            background: rgba(11, 16, 26, 0.7);
+            border: 1px solid rgba(169, 132, 77, 0.4);
+            border-radius: 6px;
+            color: #f3d9a2;
+            padding: 8px 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.92rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .sim-select:hover, .sim-select:focus {
+            border-color: #f3d9a2;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.25);
+        }
+        .sim-select option {
+            background: #0b101a;
+            color: #f3d9a2;
+        }
+
+        /* Custom action button styling */
+        .sim-action-btn {
+            background: rgba(169, 132, 77, 0.15);
+            border: 1px solid rgba(169, 132, 77, 0.5);
+            color: #f3d9a2;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .sim-action-btn:hover {
+            background: rgba(243, 217, 162, 0.25);
+            border-color: #f3d9a2;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.4);
+            transform: translateY(-1px);
+        }
+        .sim-action-btn:active {
+            transform: translateY(1px);
+        }
+        .btn-active {
+            background: rgba(243, 217, 162, 0.3) !important;
+            border-color: #f3d9a2 !important;
+            box-shadow: 0 0 15px rgba(243, 217, 162, 0.5) !important;
+        }
+
+        /* 2D Argand plane diagram container */
+        .sim-game-board-container {
+            border: 2px solid rgba(169, 132, 77, 0.4);
+            box-shadow: 0 0 25px rgba(169, 132, 77, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #04070e;
+            cursor: crosshair;
+        }
+        .sim-game-hud {
+            background: rgba(11, 16, 26, 0.85) !important;
+            border-top: 1px solid rgba(169, 132, 77, 0.3);
+        }
+
+        .metric-badge {
+            display: inline-block;
+            background: rgba(169, 132, 77, 0.18);
+            border: 1px solid rgba(169, 132, 77, 0.35);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            color: #f3d9a2;
+            margin-right: 6px;
+            font-family: monospace;
+        }
+
+        .formula-box {
+            background: rgba(11, 16, 26, 0.6);
+            border-left: 3px solid var(--gold-dark);
+            padding: 12px 16px;
+            margin: 14px 0;
+            border-radius: 0 6px 6px 0;
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            color: #ffffff;
+            letter-spacing: 0.04em;
+        }
+    </style>
+</head>
+
+<body class="sim-page">
+
+    <!-- === Full-Page Interactive 3D Canvas Visualizer === -->
+    <div class="sim-fullpage-viewport" id="viewportContainer">
+        <canvas id="simCanvas"></canvas>
+
+        <!-- Floating title overlay on canvas -->
+        <div class="sim-canvas-overlay">
+            <div class="sim-canvas-title">
+                <span class="sim-canvas-label">AXIS MUNDI · SUPERSTRING GEOMETRY</span>
+                <h1 class="sim-canvas-heading">3D Calabi-Yau Simulator</h1>
+                <p class="sim-canvas-sub">Drag to Orbit &nbsp;·&nbsp; Scroll to Zoom &nbsp;·&nbsp; Morph 4D Hyperspace Angle Below</p>
+            </div>
+        </div>
+
+        <!-- Scroll arrow at bottom of canvas -->
+        <div class="sim-scroll-down" id="scrollArrow">
+            <span>Scroll for Science</span>
+            <svg class="scroll-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- === Control Deck (floating on desktop / below on mobile) === -->
+    <div class="sim-below-section" id="controlSection">
+        <div class="sim-panel-header" id="panelHeader">
+            <div class="sim-panel-header-left">
+                <span class="sim-panel-drag-dots">⠿</span>
+                <span class="sim-panel-title">Manifold Parameters</span>
+            </div>
+            <button class="sim-panel-collapse-btn" id="collapseBtn" title="Expand controls" aria-expanded="false"
+                aria-controls="panelBody">
+                <svg class="sim-collapse-chevron collapsed" id="collapseChevron" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" width="16" height="16">
+                    <path d="M18 15l-6-6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+        <div class="sim-panel-body collapsed" id="panelBody">
+            <div class="sim-control-panel">
+
+                <!-- Left cluster: Primary controls -->
+                <div class="sim-deck-cluster">
+                    <h3 class="sim-deck-heading">Primary Manifold Topology</h3>
+
+                    <!-- Dropdown: Manifold Variety -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Manifold Degree (n)</span>
+                        </div>
+                        <select id="manifoldSelect" class="sim-select">
+                            <option value="5" selected>n = 5 · Quintic Threefold (25 Sheets · String Compactification)</option>
+                            <option value="4">n = 4 · Kummer Quartic / K3 Surface (16 Sheets · Calabi-Yau 2-Fold)</option>
+                            <option value="3">n = 3 · Fermat Cubic Triad (9 Sheets · Mirror Symmetry)</option>
+                            <option value="6">n = 6 · Hexagonal Orbifold (36 Sheets · T⁶/ℤ₆ Heterotic)</option>
+                            <option value="8">n = 8 · Octic Vacuum Landscape (64 Sheets · High-Genus Flux)</option>
+                            <option value="2">n = 2 · Complex Elliptic Torus (4 Sheets · 1D Calabi-Yau)</option>
+                            <option value="7">n = 7 · Septic Moduli Cross-Section (49 Sheets)</option>
+                        </select>
+                    </div>
+
+                    <!-- Slider 1: Camera Zoom -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>Camera Distance (Zoom)</span>
+                            <span id="zoomVal" class="sim-value-badge">3.2</span>
+                        </div>
+                        <input type="range" id="zoomSlider" class="sim-slider" min="1.5" max="6.5" step="0.1"
+                            value="3.2">
+                    </div>
+
+                    <!-- Slider 2: 3D Orbit Speed -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>3D Orbit Speed</span>
+                            <span id="orbitSpeedVal" class="sim-value-badge">1.0x</span>
+                        </div>
+                        <input type="range" id="orbitSpeedSlider" class="sim-slider" min="0.0" max="3.0" step="0.1"
+                            value="1.0">
+                    </div>
+
+                    <!-- Slider 3: 4D Hyperspace Rotation Speed -->
+                    <div class="sim-control-group">
+                        <div class="sim-control-label">
+                            <span>4D Hyperspace Rate (α)</span>
+                            <span id="alphaSpeedVal" class="sim-value-badge">1.0x</span>
+                        </div>
+                        <input type="range" id="alphaSpeedSlider" class="sim-slider" min="0.0" max="3.0" step="0.1"
+                            value="1.0">
+                    </div>
+                </div>
+
+                <!-- Right cluster: Advanced / Color controls -->
+                <div class="sim-deck-cluster sim-deck-cluster--wide">
+                    <h3 class="sim-deck-heading">Quantum Aesthetics & Slicing</h3>
+
+                    <div class="sim-weights-table" style="grid-template-columns: 1fr; gap: 14px; margin-top: 5px;">
+                        <!-- Dropdown: Color Palette -->
+                        <div class="sim-control-group" style="padding: 0;">
+                            <div class="sim-control-label">
+                                <span>Quantum Radiance Theme</span>
+                            </div>
+                            <select id="colorThemeSelect" class="sim-select">
+                                <option value="gold" selected>Celestial Gold (Type IIB String Vacuum)</option>
+                                <option value="sapphire">Cosmic Sapphire (High-Energy Flux State)</option>
+                                <option value="ruby">Rose K3 (Kummer Algebraic Quartic)</option>
+                                <option value="emerald">Emerald Mirror (Mirror Symmetry Dual)</option>
+                                <option value="amethyst">Royal Amethyst (Heterotic Toroidal Orbifold)</option>
+                            </select>
+                        </div>
+
+                        <!-- Dropdown: Render Mode -->
+                        <div class="sim-control-group" style="padding: 0;">
+                            <div class="sim-control-label">
+                                <span>Geometry Representation</span>
+                            </div>
+                            <select id="renderModeSelect" class="sim-select">
+                                <option value="glass" selected>Translucent Quantum Glass (Internal Sheet Flow)</option>
+                                <option value="kahler">Holographic Kähler Grid (Coordinate Isolines)</option>
+                                <option value="solid">Solid Specular (Curvature Radiance)</option>
+                            </select>
+                        </div>
+
+                        <!-- Slider 4: Grid Density -->
+                        <div class="sim-control-group" style="padding: 0;">
+                            <div class="sim-control-label">
+                                <span>Tessellation Detail</span>
+                                <span id="densityVal" class="sim-value-badge">Crisp (17)</span>
+                            </div>
+                            <input type="range" id="densitySlider" class="sim-slider" min="10" max="22" step="1"
+                                value="17">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="resetViewBtn" class="sim-action-btn" style="flex: 1; justify-content: center;">
+                                <span>↺</span> Reset View
+                            </button>
+                            <button id="pauseAlphaBtn" class="sim-action-btn" style="flex: 1; justify-content: center;">
+                                <span>⏸</span> Pause 4D Morph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- === Scientific Educational Section (Below Canvas) === -->
+    <div class="section-container" style="max-width: 1000px; margin: 40px auto; padding: 0 20px; text-align: center;">
+
+        <!-- Box 1: The TL;DR on Calabi-Yau Manifolds -->
+        <div class="event-description-box who-we-are-box" style="text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                <h3 style="margin-bottom: 0;">The TL;DR on Calabi-Yau Manifolds</h3>
+                <span class="metric-badge" id="activeManifoldBadge">Degree n = 5 · χ = -200</span>
+            </div>
+            <p style="font-weight: 500; margin: 12px 0; color: var(--gold-light);">
+                Why does modern theoretical physics spend decades studying these intricate multi-sheeted shapes?
+            </p>
+            <p>
+                In <strong>superstring theory</strong>, fundamental particles are not zero-dimensional points, but vibrating one-dimensional strings.
+                For the quantum mathematics of string theory to be consistent without negative probabilities or quantum anomalies, the universe requires 
+                <strong>10 spacetime dimensions</strong>: 4 macroscopic dimensions that we experience (3 space + 1 time), and <strong>6 hidden spatial dimensions</strong>.
+            </p>
+            <p style="margin-top: 10px;">
+                Where are the other 6 dimensions? They are curled up ("compactified") at every point in space at the minuscule Planck length (~10⁻³⁵ meters). 
+                In 1985, physicists Philip Candelas, Gary Horowitz, Andrew Strominger, and Edward Witten proved that to preserve supersymmetry and zero cosmological vacuum energy, 
+                these 6 dimensions must form a Ricci-flat, Kähler manifold with $SU(3)$ holonomy — known as a <strong>Calabi-Yau manifold</strong>.
+            </p>
+            <div class="formula-box">
+                Ricci-Flatness: R<sub>īj</sub> = 0 &nbsp;·&nbsp; Vanishing First Chern Class: c₁(M) = 0
+            </div>
+            <p>
+                The exact geometry, number of topological holes (Euler characteristic $\chi$), and harmonic forms of the Calabi-Yau manifold directly determine 
+                <strong>the spectrum of elementary particles, their masses, coupling constants, and the three generations of quarks and leptons</strong> in our 4-dimensional world!
+            </p>
+        </div>
+
+        <!-- Box 2: 2D Complex Root / Argand Cross-Section Explorer -->
+        <div class="event-description-box who-we-are-box sim-game-box" style="margin-top: 0; text-align: left;">
+            <h3 class="sim-game-title"
+                style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-light); margin-bottom: 10px; letter-spacing: 0.05em;">
+                Try it Yourself: Complex Root & Argand Plane Slicing</h3>
+            <p style="font-weight: 500; margin-bottom: 20px; color: var(--gold-light);">
+                Move your cursor over the Argand plane to explore the complex coordinates $z_1^n + z_2^n = 1$.
+                <span style="display: block; font-size: 0.85rem; font-style: italic; color: #dfcdac; margin-top: 5px;">
+                    Click to freeze or unfreeze the phase angle $\alpha$.
+                </span>
+            </p>
+
+            <div class="sim-game-layout">
+                <!-- Left: Big Canvas + HUD -->
+                <div class="sim-game-board-container">
+                    <canvas id="gameCanvas" width="400" height="400"></canvas>
+                    <div class="sim-game-hud">
+                        <div class="hud-item">
+                            <span class="hud-label">Degree (n):</span>
+                            <span id="argandDegree" class="hud-value">5</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Sheets (n²):</span>
+                            <span id="argandSheets" class="hud-value">25</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">Phase (α):</span>
+                            <span id="argandAlpha" class="hud-value">0.78 rad</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Information & actions -->
+                <div class="sim-game-die-right">
+                    <p style="font-size: 0.9rem; line-height: 1.5; color: var(--gold-light); margin-bottom: 15px;">
+                        This interactive diagram renders the <strong>n-th roots of unity</strong> in the complex plane $\mathbb{C}$. 
+                        Each node represents a distinct sheet $(k_1, k_2)$ of the Fermat hypersurface:
+                        <br><strong style="font-size: 1.05rem; color: #ffffff;">z₁ⁿ + z₂ⁿ = 1</strong>
+                        <br><br>
+                        The connecting geodesics illustrate the 4D hyperspace phase angle <strong>α</strong>. As α advances, the sheets smoothly 
+                        interweave and pass through one another in 3D projection without intersecting in their native 6D manifold!
+                    </p>
+                    <div class="game-action-buttons" style="flex-direction: column; width: 100%; gap: 10px;">
+                        <button id="lockArgandBtn" class="sim-action-btn" style="width: 100%; justify-content: center;">
+                            <span>🔒</span> Lock Phase Angle
+                        </button>
+                        <button id="cyclePaletteBtn" class="sim-action-btn" style="width: 100%; justify-content: center;">
+                            <span>🎨</span> Cycle Palette
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Box 3: Andrew J. Hanson's Mathematical Projection -->
+        <div class="event-description-box contact-box" style="margin-top: 0; text-align: left;">
+            <h3>How Do We Project 6 Dimensions Into 3D?</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Andrew J. Hanson's closed-form Fermat Hypersurface projection.
+            </p>
+            <p>
+                Because humans perceive three spatial dimensions, visualizing a 6-dimensional Calabi-Yau 3-fold requires a geometric cross-section. 
+                Computer scientist and physicist <strong>Andrew J. Hanson</strong> (Indiana University) pioneered the standard method used in string theory textbooks:
+            </p>
+            <ul class="sim-real-life-list" style="margin-top: 14px;">
+                <li>✦ <strong>Fermat Hypersurface Slice:</strong> Setting coordinates in complex projective 4-space $\mathbb{CP}^4$ reduces the quintic threefold to the tractable complex curve $z_1^n + z_2^n = 1$.</li>
+                <li>✦ <strong>Exact Parameterization:</strong> The equation is identically solved for $x \in [0, \pi/2]$ and $y \in \mathbb{R}$ by:
+                    <div style="font-family: monospace; padding: 6px 12px; background: rgba(0,0,0,0.4); border-radius: 4px; margin: 6px 0; color: #f3d9a2;">
+                        z₁ = e^(i·2πk₁/n) · [cos(x + iy)]^(2/n)<br>
+                        z₂ = e^(i·2πk₂/n) · [sin(x + iy)]^(2/n)
+                    </div>
+                </li>
+                <li>✦ <strong>4D Hyperspace Rotation:</strong> The 4 real coordinates $(x_1, y_1, x_2, y_2)$ in $\mathbb{R}^4$ are rotated by angle $\alpha(t)$:
+                    <div style="font-family: monospace; padding: 6px 12px; background: rgba(0,0,0,0.4); border-radius: 4px; margin: 6px 0; color: #f3d9a2;">
+                        X = Re(z₁), &nbsp; Y = Re(z₂), &nbsp; Z = Im(z₁)·cos(α) + Im(z₂)·sin(α)
+                    </div>
+                </li>
+                <li>✦ <strong>Multisheet Topology:</strong> Choosing all $k_1, k_2 \in \{0, \dots, n-1\}$ generates all $n^2$ overlapping petals that form the famous Calabi-Yau cross-section.</li>
+            </ul>
+        </div>
+
+        <!-- Box 4: Mirror Symmetry & Conifolds -->
+        <div class="event-description-box" style="margin-top: 0; text-align: left;">
+            <h3>Mirror Symmetry & The Topology-Changing Conifold</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                When two completely different geometric worlds describe the exact same physics.
+            </p>
+            <p>
+                In 1991, physicists discovered <strong>Mirror Symmetry</strong>: for every Calabi-Yau manifold $M$ with Hodge numbers $(h^{1,1}, h^{2,1})$, 
+                there exists a "mirror manifold" $W$ with swapped Hodge numbers $(h^{2,1}, h^{1,1})$. Even though their classical shapes, hole counts, and differential geometry 
+                are completely different, string theory on $M$ is physically indistinguishable from string theory on $W$!
+            </p>
+            <p style="margin-top: 10px;">
+                Furthermore, in classical general relativity, spacetime cannot tear or change topology without catastrophic singularities. 
+                In string theory, Brian Greene, David Morrison, and Andrew Strominger proved that <strong>conifold transitions</strong> allow a Calabi-Yau manifold to 
+                pinch its 3-cycles down to zero size and re-expand into 2-cycles — smoothly ripping and sewing the fabric of spacetime without any physical breakdown!
+            </p>
+        </div>
+
+        <!-- Box 5: Further Reading -->
+        <div class="event-description-box sim-reading-box" style="margin-top: 0; text-align: left;">
+            <h3>Further Reading & Physics Visualizations</h3>
+            <p style="font-weight: 500; margin-bottom: 12px; color: var(--gold-light);">
+                Dive deeper into string theory, extra dimensions, and Calabi-Yau geometry.
+            </p>
+
+            <div class="sim-reading-sections">
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Visual Lectures & Documentaries</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.youtube.com/watch?v=kYAdwS5MFjQ" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> PBS Space Time: The Geometry of String Theory
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=2rkg6XF8bCU" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Brian Greene: The Elegant Universe (NOVA)
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=2s4TqV8q5IA" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">▶</span> Harvard: Shing-Tung Yau on Calabi-Yau Manifolds
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sim-reading-section">
+                    <span class="sim-reading-section-title">Books & Academic Papers</span>
+                    <div class="sim-reading-pills">
+                        <a href="https://www.cs.indiana.edu/~hanson/papers/CP2-94.pdf" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">📄</span> A. J. Hanson: Computer Visualization of Complex Curves
+                        </a>
+                        <a href="https://en.wikipedia.org/wiki/Calabi%E2%80%93Yau_manifold" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">📖</span> Wikipedia: Calabi-Yau Manifold
+                        </a>
+                        <a href="https://demonstrations.wolfram.com/CalabiYauSpace/" target="_blank" rel="noopener noreferrer"
+                            class="sim-reading-pill">
+                            <span class="sim-reading-pill-icon">🔬</span> Wolfram: Calabi-Yau Space Demonstration
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Website CTA -->
+        <div style="margin-top: 30px; margin-bottom: 50px;">
+            <a href="index.html" class="explorer-btn">
+                <span>← Return to Axis Mundi Events</span>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Scripts: Calabi-Yau Simulation Engine -->
+    <script src="calabi-yau-simulation.js"></script>
+</body>
+
+</html>
