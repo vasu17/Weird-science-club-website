@@ -635,12 +635,17 @@ function init3DRandomWalk() {
 
     const ctx = canvas.getContext('2d');
 
-    // Set high-DPI resolution
+    // High-DPI resolution with supersampling for extra-crisp lines
+    const SUPERSAMPLE     = 1.5;
+    const MAX_RENDER_SCALE = 3;
+    let renderScale = 1;
+
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
-        ctx.scale(dpr, dpr);
+        renderScale = Math.min(dpr * SUPERSAMPLE, MAX_RENDER_SCALE);
+        canvas.width = window.innerWidth * renderScale;
+        canvas.height = window.innerHeight * renderScale;
+        ctx.scale(renderScale, renderScale);
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -732,8 +737,8 @@ function init3DRandomWalk() {
         const D = 700; // Camera distance from center focus
         const scale = F / (F + z2 + D);
 
-        const cx = canvas.width / (2 * (window.devicePixelRatio || 1));
-        const cy = canvas.height / (2 * (window.devicePixelRatio || 1));
+        const cx = canvas.width / (2 * renderScale);
+        const cy = canvas.height / (2 * renderScale);
 
         // Dynamically adjust size scale to perfectly fit mobile and desktop viewports
         const wVal = window.innerWidth;
@@ -758,8 +763,8 @@ function init3DRandomWalk() {
 
     // Animation render loop
     function draw() {
-        const w = canvas.width / (window.devicePixelRatio || 1);
-        const h = canvas.height / (window.devicePixelRatio || 1);
+        const w = canvas.width / renderScale;
+        const h = canvas.height / renderScale;
         ctx.clearRect(0, 0, w, h);
 
         const now = Date.now();

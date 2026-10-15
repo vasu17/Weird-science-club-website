@@ -177,15 +177,21 @@ function initInteractiveSimulator() {
 
     // ── Canvas sizing ──────────────────────────────────────
     let cachedSizeScale = 1; // recomputed on resize
-    let cachedDpr = 1;       // track device pixel ratio
+    let cachedDpr = 1;       // render scale (device pixels per CSS pixel)
+
+    // Supersample beyond native DPR for extra-crisp lines and text.
+    // Capped so huge 4K/retina displays don't blow up memory or fill-rate.
+    const SUPERSAMPLE     = 1.5;
+    const MAX_RENDER_SCALE = 3;
 
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        cachedDpr = dpr;
-        canvas.width  = viewport.clientWidth  * dpr;
-        canvas.height = viewport.clientHeight * dpr;
+        const renderScale = Math.min(dpr * SUPERSAMPLE, MAX_RENDER_SCALE);
+        cachedDpr = renderScale;
+        canvas.width  = viewport.clientWidth  * renderScale;
+        canvas.height = viewport.clientHeight * renderScale;
         // Setting canvas.width resets the transform, so safe to scale here
-        ctx.scale(dpr, dpr);
+        ctx.scale(renderScale, renderScale);
 
         const vw = viewport.clientWidth;
         const vh = viewport.clientHeight;
@@ -303,6 +309,14 @@ function initInteractiveSimulator() {
         });
     }
 
+    // The static "Scroll for the Science" hint above the education grid
+    const eduScrollHint = document.getElementById('eduScrollHint');
+    if (eduScrollHint) {
+        eduScrollHint.addEventListener('click', () => {
+            document.getElementById('education-section')?.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
     // ── 3D Projection ──────────────────────────────────────
     let cameraCenter = { x: 0, y: 0, z: 0 };
 
@@ -319,9 +333,8 @@ function initInteractiveSimulator() {
         const F = 500, D = 600;
         const scale = F / (F + z2 + D);
 
-        const dpr = window.devicePixelRatio || 1;
-        const cx  = canvas.width  / (2 * dpr);
-        const cy  = canvas.height / (2 * dpr);
+        const cx  = canvas.width  / (2 * cachedDpr);
+        const cy  = canvas.height / (2 * cachedDpr);
         const projectedScale = scale * (cachedSizeScale / 420);
 
         return {
@@ -355,7 +368,7 @@ function initInteractiveSimulator() {
 
         needsRedraw = false;
 
-        const dpr = window.devicePixelRatio || 1;
+        const dpr = cachedDpr;
         const w   = canvas.width  / dpr;
         const h   = canvas.height / dpr;
         ctx.clearRect(0, 0, w, h);
@@ -422,8 +435,8 @@ function initInteractiveSimulator() {
             { stroke: 'rgba( 60, 200, 255, 0.9)', label: 'rgba( 80,220,255,1)' }  // Z — vivid cyan
         ];
 
-        // Compute adaptive linewidth: thicker on high-DPR screens
-        const axisLW = Math.max(1.5, 2.0); // stays 2px logical regardless of DPR
+        // Compute crisp linewidth in CSS pixels (supersampled transform handles device pixels)
+        const axisLW = 2;
 
         const axisEndpoints = [
             { neg: project(-bounds, 0, 0, tR, pR), pos: project(bounds, 0, 0, tR, pR), colorIdx: 0, labelNeg: '−X', labelPos: '+X' },
@@ -443,7 +456,7 @@ function initInteractiveSimulator() {
         });
 
         // ── Axis labels ───────────────────────────────────
-        ctx.font         = `600 ${Math.max(11, 13 / dpr * dpr)}px "Outfit", sans-serif`;
+        ctx.font         = `600 ${Math.max(11, 13)}px "Outfit", sans-serif`;
         ctx.textBaseline = 'middle';
         const labelOffset = bounds + 22;
         const axisLabels = [
@@ -493,13 +506,12 @@ function initInteractiveSimulator() {
         }
         ctx.restore();
 
-        // ── Walk path (adaptive line width for mobile DPR) ────
+        // ── Walk path — crisp line widths (supersampling handles hi-DPI) ────
         ctx.save();
         const pathLen = history.length;
         const startIdx = Math.max(0, pathLen - targetHistory - 1);
-        // Minimum line width scales with DPR so lines are crisp on mobile
-        const minLW = Math.max(0.5, 0.8 / dpr);
-        const maxLW = Math.max(1.2, 2.0 / dpr * dpr);
+        const minLW = 0.8;
+        const maxLW = 2.2;
         for (let i = startIdx; i < pathLen - 2; i++) {
             const dx = Math.abs(history[i].x - history[i+1].x);
             const dy = Math.abs(history[i].y - history[i+1].y);
