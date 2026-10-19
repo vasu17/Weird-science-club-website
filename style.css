@@ -365,7 +365,7 @@ header {
     display: grid;
     gap: 16px;
     width: 100%;
-    padding: 16px 0 24px;
+    padding: 16px 0 12px;
 }
 
 #upcoming-talks .talk {
@@ -1200,12 +1200,13 @@ header {
     z-index: 3;
     position: relative;
 
-    /* Transparent interior */
-    background: transparent;
+    background: rgba(11, 16, 26, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 40px;
 
     /* Animated travelling-glow border via conic-gradient pseudo */
-    /* We use a pseudo-element background approach so it stays transparent inside */
+    /* The pseudo-element keeps the glow on the border. */
 }
 
 .signup-btn::before {
@@ -2232,7 +2233,7 @@ header {
     justify-content: center;
     width: 100%;
     max-width: 600px;
-    margin: 40px auto 20px;
+    margin: 12px auto 20px;
     padding: 0 20px;
     z-index: 5;
     position: relative;
