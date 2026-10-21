@@ -204,6 +204,23 @@ if (lightbox) {
 /* --- Past Events Logic --- */
 
 const PAST_EVENTS_CONFIG = {
+    event3: {
+        date: "October 20, 2026",
+        talks: [
+            {
+                title: "The Vastness of the Universe and the Uniqueness of Earth",
+                speaker: "Norbert Werner, Masaryk University",
+                slides: "",
+                abstractEn: "In three simple steps, I will introduce the distances in the Universe in a way that allows everyone to visualize the size of our Solar System, our Galaxy, and the entire observable Universe. The understanding of these cosmic scales allows us to appreciate the uniqueness and the extraordinary nature of our Earth."
+            },
+            {
+                title: "superpočítače a čierne diery",
+                speaker: "Matúš Labaj, Masaryk University",
+                slides: "",
+                abstractEn: "Čiernu dieru nevyrobíme v laboratóriu, nedoletíme k nej a jej rovnice nevyriešime na papieri. Fyzikálne zákony však poznáme, a tak necháme superpočítač aby sa nimi trápil. Ukážeme si, ako taký stroj naozaj vyzerá a ako sa s ním pracuje (spoiler: nie ako v Iron Manovi). Z rovníc a miliárd výpočtov potom vznikajú pôsobivé stvárnenia hmoty padajúcej do čiernej diery, zrážajúcich sa jetov a hviezdnych vetrov v strede našej Galaxie. Porovnáme simulácie so skutočnými pozorovaniami, napríklad s prvou „fotkou“ čiernej diery, a uvidíme, prečo ich niekedy takmer nerozoznáme."
+            }
+        ]
+    },
     event2: {
         date: "May 22, 2026",
         talks: [
