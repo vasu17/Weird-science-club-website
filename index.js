@@ -204,6 +204,23 @@ if (lightbox) {
 /* --- Past Events Logic --- */
 
 const PAST_EVENTS_CONFIG = {
+    event4: {
+        date: "November 18, 2026",
+        talks: [
+            {
+                title: "Prečo vznikajú zápchy aj bez nehody? Ako matematika opisuje dopravu.",
+                speaker: "Lucia Kajanová, Přf Muni",
+                slides: "",
+                abstractEn: "Dopravná zápcha nemusí vzniknúť len kvôli nehode, semaforu či uzávierke – niekedy sa objaví zdanlivo sama. Ukážeme si, ako možno dopravu opisovať pomocou matematiky, čo nám o nej hovoria základné veličiny, ako sú rýchlosť, hustota a tok vozidiel, a ako tieto veličiny navzájom súvisia. Pozrieme sa aj na to, ako vznikajú dopravné postupujúce vlny a ako ich dokážu zachytiť matematické modely aj počítačové simulácie."
+            },
+            {
+                title: "Turingov jav: vznik priestorových vzorov",
+                speaker: "Jakub Záthurecký, Přf Muni",
+                slides: "",
+                abstractEn: "Zamysleli ste sa už niekedy nad tým, prečo majú mnohé zvieratá tak rôznorodé a pestré sfarbenie? Prečo je leopard fľakatý, či zebra pruhovaná? Napadlo by Vám, že jedno z najpravdepodobnejších vysvetlení dokáže ponúknuť práve matematika? Ukážeme si ako takzvané reakčno-difúzne systémy vysvetľujú vznik priestorových vzorov v mnohých biologických štruktúrach a nie len v nich."
+            }
+        ]
+    },
     event3: {
         date: "October 20, 2026",
         talks: [
@@ -308,6 +325,18 @@ function renderPastEvents() {
 /* --- Gallery Logic --- */
 
 const GALLERY_CONFIG = [
+    {
+        id: "event4",
+        date: "18-11-2026",
+        folder: "assets/images/18-11-2026",
+        images: [
+            "photo_1.jpg",
+            "photo_2.jpg",
+            "photo_3.jpg",
+            "photo_4.jpg",
+            "photo_5.jpg"
+        ]
+    },
     {
         id: "event2",
         date: "22-05-2026",
